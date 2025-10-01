@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partnership Business</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.28/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .member-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+        .member-name {
+            font-weight: 600;
+            font-size: 16px;
+            flex-grow: 1;
+        }
+        .member-balance {
+            font-weight: bold;
+            font-size: 16px;
+            margin-right: 15px;
+        }
+        .member-actions {
+            position: relative;
+        }
+        .dropdown-menu {
+            min-width: 120px;
+        }
+        .balance-summary {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .remaining-balance {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            color: #28a745;
+            margin: 10px 0;
+        }
+        .transaction-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #28a745;
+            position: relative;
+            padding-right: 50px;
+        }
+        .transaction-item.cash-out {
+            border-left-color: #dc3545;
+        }
+        .back-button {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        .transaction-actions {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            z-index: 10;
+        }
+        .transaction-actions .btn {
+            padding: 2px 8px;
+            font-size: 14px;
+            background: transparent;
+            border: none;
+            color: #6c757d;
+        }
+        .transaction-actions .btn:hover {
+            background: #f8f9fa;
+            color: #000;
+        }
+        .date-filter {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .filter-summary {
+            background: #e7f3ff;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .filter-toggle {
+            background: none;
+            border: none;
+            color: #007bff;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px 0;
+        }
+        /* Updated Share Card Style - Simple and Clean */
+        .share-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+            font-family: Arial, sans-serif;
+        }
+        .share-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .share-party-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .share-date {
+            color: #666;
+        }
+        .share-amount {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+        }
+        .share-details {
+            margin: 15px 0;
+        }
+        .share-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        .share-detail-row:last-child {
+            border-bottom: none;
+        }
+        .share-current-balance {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .share-comment {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .share-footer {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 12px;
+        }
+        /* Day Summary Share Card */
+        .day-summary-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 10px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .day-summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ddd;
+        }
+        .day-summary-member {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .day-summary-date {
+            color: #666;
+            font-size: 16px;
+        }
+        .day-summary-divider {
+            height: 1px;
+            background: #ddd;
+            margin: 15px 0;
+        }
+        .day-summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 16px;
+        }
+        .day-summary-label {
+            font-weight: normal;
+        }
+        .day-summary-amount {
+            font-weight: bold;
+        }
+        .day-summary-positive {
+            color: #28a745;
+        }
+        .day-summary-negative {
+            color: #dc3545;
+        }
+        .day-summary-current-balance {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #28a745;
+        }
+        .day-summary-footer {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #ddd;
+            color: #666;
+            font-size: 12px;
+        }
+        .date-share-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 12px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        .date-share-button:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="bg-primary text-white p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <button class="back-button text-white" id="backButton" style="display: none;">←</button>
+                    <h4 class="mb-0" id="headerTitle">Partnership Business</h4>
+                </div>
+                <button class="btn btn-light btn-sm" onclick="downloadPDF()">📄 PDF</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent">
+            <!-- Member List View -->
+            <div id="memberListView" class="p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Members</h5>
+                    <button class="btn btn-primary btn-sm" onclick="showAddMemberForm()">+ Add Member</button>
+                </div>
+                
+                <div id="memberList">
+                    <!-- Members will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Member Detail View (Hidden by default) -->
+            <div id="memberDetailView" style="display: none;" class="p-3">
+                <!-- Filter Icon and Summary -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0" id="transactionHistoryTitle">Transaction History</h5>
+                    <div>
+                        <button class="btn btn-outline-primary btn-sm" onclick="toggleDateFilter()">
+                            🔍 Filter
+                        </button>
+                        <div class="btn-group ms-1">
+                            <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                Quick Filters
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="applyQuickFilter('today')">Today</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="applyQuickFilter('yesterday')">Yesterday</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="applyQuickFilter('thisMonth')">This Month</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="applyQuickFilter('threeMonths')">Three Months</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="applyQuickFilter('oneYear')">One Year</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Range Filter Summary -->
+                <div class="filter-summary" id="filterSummary" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Date Range:</strong> 
+                            <span id="filterRangeText"></span>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="clearDateFilter()">Clear Filter</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Range Filter (Collapsible) -->
+                <div class="date-filter" id="dateFilterSection" style="display: none;">
+                    <h6>Filter Transactions by Date</h6>
+                    <div class="row">
+                        <div class="col-md-5 mb-2">
+                            <label class="form-label">From Date</label>
+                            <input type="date" class="form-control" id="filterFromDate">
+                        </div>
+                        <div class="col-md-5 mb-2">
+                            <label class="form-label">To Date</label>
+                            <input type="date" class="form-control" id="filterToDate">
+                        </div>
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <button class="btn btn-primary w-100" onclick="applyDateFilter()">Apply</button>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <button class="btn btn-success btn-sm" onclick="downloadFilteredPDF()">📄 Download Filtered PDF</button>
+                    </div>
+                </div>
+
+                <!-- Balance Summary -->
+                <div class="balance-summary">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <small class="text-muted">Opening Balance</small>
+                            <div class="fw-bold" id="detailOpeningBalance">0</div>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">Total Cash In</small>
+                            <div class="fw-bold text-success" id="detailTotalIn">0</div>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">Total Cash Out</small>
+                            <div class="fw-bold text-danger" id="detailTotalOut">0</div>
+                        </div>
+                    </div>
+                    <div class="remaining-balance" id="detailRemainingBalance">0</div>
+                </div>
+
+                <!-- Transaction Buttons -->
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <button class="btn btn-success w-100" onclick="showTransactionForm('cash_in')">💰 Cash In</button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-danger w-100" onclick="showTransactionForm('cash_out')">💸 Cash Out</button>
+                    </div>
+                </div>
+
+                <!-- Transaction Form -->
+                <div class="bg-light rounded p-3 mb-3" id="transactionForm" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0" id="formTitle">Add Transaction</h6>
+                        <button type="button" class="btn-close" onclick="hideTransactionForm()"></button>
+                    </div>
+                    <form id="transactionFormElement">
+                        <input type="hidden" id="transactionType">
+                        <input type="hidden" id="editingTransactionId" value="">
+                        
+                        <div class="mb-2">
+                            <label class="form-label">Amount *</label>
+                            <input type="number" class="form-control" id="amount" required>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <label class="form-label">Remark</label>
+                            <textarea class="form-control" id="comment" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control" id="transactionDate">
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" id="saveTransactionBtn">Save Transaction</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Transaction History -->
+                <div id="transactionHistory">
+                    <!-- Transactions will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Updated Share Transaction Modal - Simple and Clean -->
+    <div class="modal fade" id="shareModal" tabindex="-1">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Transaction Receipt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="share-card">
+                        <div class="share-header">
+                            <div class="share-party-name" id="sharePartyName">Member Name</div>
+                            <div class="share-date" id="shareDate">Date</div>
+                        </div>
+                        
+                        <div class="share-amount" id="shareAmount">
+                            0
+                        </div>
+                        
+                        <div class="share-details">
+                            <div class="share-detail-row">
+                                <span>Last Balance</span>
+                                <span id="shareOpeningBalance">0</span>
+                            </div>
+                            <div class="share-detail-row">
+                                <span id="shareTypeLabel">Today Received</span>
+                                <span id="shareTransactionAmount">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="share-current-balance" id="shareCurrentBalance">
+                            0
+                        </div>
+                        
+                        <div id="shareComment" class="share-comment" style="display: none;">
+                            <strong>Remark:</strong><br>
+                            <span id="shareCommentText">No remarks</span>
+                        </div>
+                        
+                        <div class="share-footer">
+                            <small>Generated on: <span id="shareGeneratedDate"></span></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadShareAsImage()">Save as Image</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Day Summary Share Modal -->
+    <div class="modal fade" id="daySummaryModal" tabindex="-1">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Day Transaction Summary</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="day-summary-card" id="daySummaryCard">
+                        <div class="day-summary-header">
+                            <div class="day-summary-member" id="daySummaryMember">Member Name</div>
+                            <div class="day-summary-date" id="daySummaryDate">30/09/2024</div>
+                        </div>
+                        
+                        <div class="day-summary-divider"></div>
+                        
+                        <div class="day-summary-row">
+                            <span class="day-summary-label">Opening Balance</span>
+                            <span class="day-summary-amount" id="daySummaryOpeningBalance">₹ 1000</span>
+                        </div>
+                        
+                        <div id="daySummaryTransactions">
+                            <!-- Transactions will be added here dynamically -->
+                        </div>
+                        
+                        <div class="day-summary-divider"></div>
+                        
+                        <div class="day-summary-current-balance" id="daySummaryCurrentBalance">
+                            ₹ 800
+                        </div>
+                        
+                        <div class="day-summary-footer">
+                            <small>Generated on: <span id="daySummaryGeneratedDate"></span></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadDaySummaryAsImage()">Save as Image</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Data Management
+        let parties = JSON.parse(localStorage.getItem('parties')) || [];
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let currentParty = null;
+        let editingTransaction = null;
+        let currentFilter = {
+            fromDate: null,
+            toDate: null
+        };
+
+        // Number formatting function
+        function formatNumber(num) {
+            return new Intl.NumberFormat('en-IN').format(num);
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMembers();
+            document.getElementById('transactionDate').valueAsDate = new Date();
+        });
+
+        // View Management
+        function showMemberList() {
+            document.getElementById('memberListView').style.display = 'block';
+            document.getElementById('memberDetailView').style.display = 'none';
+            document.getElementById('backButton').style.display = 'none';
+            document.getElementById('headerTitle').textContent = 'Partnership Business';
+            currentParty = null;
+            currentFilter.fromDate = null;
+            currentFilter.toDate = null;
+        }
+
+        function showMemberDetail(party) {
+            currentParty = party;
+            document.getElementById('memberListView').style.display = 'none';
+            document.getElementById('memberDetailView').style.display = 'block';
+            document.getElementById('backButton').style.display = 'block';
+            document.getElementById('headerTitle').textContent = party.name;
+            
+            // Clear any existing filters when showing member details
+            currentFilter.fromDate = null;
+            currentFilter.toDate = null;
+            document.getElementById('filterSummary').style.display = 'none';
+            
+            updateMemberDetail();
+            loadMemberTransactions();
+        }
+
+        // Date Range Filter Functions
+        function toggleDateFilter() {
+            const filterSection = document.getElementById('dateFilterSection');
+            if (filterSection.style.display === 'none') {
+                filterSection.style.display = 'block';
+            } else {
+                filterSection.style.display = 'none';
+            }
+        }
+
+        // Quick Filter Functions - COMPLETELY REWRITTEN
+        function applyQuickFilter(type) {
+            const today = new Date();
+            let fromDate = new Date();
+            let toDate = new Date();
+            
+            switch(type) {
+                case 'today':
+                    // Set both from and to dates to today
+                    fromDate = new Date(today);
+                    toDate = new Date(today);
+                    break;
+                case 'yesterday':
+                    // Set both from and to dates to yesterday
+                    fromDate = new Date(today);
+                    fromDate.setDate(today.getDate() - 1);
+                    toDate = new Date(fromDate);
+                    break;
+                case 'thisMonth':
+                    // Set from date to 1st of current month, to date to today
+                    fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    toDate = new Date(today);
+                    break;
+                case 'threeMonths':
+                    fromDate = new Date(today);
+                    fromDate.setMonth(today.getMonth() - 3);
+                    toDate = new Date(today);
+                    break;
+                case 'oneYear':
+                    fromDate = new Date(today);
+                    fromDate.setFullYear(today.getFullYear() - 1);
+                    toDate = new Date(today);
+                    break;
+            }
+            
+            // Format dates as YYYY-MM-DD
+            const formatDate = (date) => date.toISOString().split('T')[0];
+            
+            currentFilter.fromDate = formatDate(fromDate);
+            currentFilter.toDate = formatDate(toDate);
+            
+            // Update filter inputs
+            document.getElementById('filterFromDate').value = currentFilter.fromDate;
+            document.getElementById('filterToDate').value = currentFilter.toDate;
+            
+            // Show filter summary and hide filter section
+            document.getElementById('filterSummary').style.display = 'block';
+            document.getElementById('dateFilterSection').style.display = 'none';
+            
+            // Format display text for filter summary
+            const fromDisplay = formatDateForDisplay(currentFilter.fromDate);
+            const toDisplay = formatDateForDisplay(currentFilter.toDate);
+            document.getElementById('filterRangeText').textContent = `${fromDisplay} to ${toDisplay}`;
+            
+            updateMemberDetail();
+            loadMemberTransactions();
+        }
+
+        // Helper function to format date for display (DD/MM/YYYY)
+        function formatDateForDisplay(dateString) {
+            const date = new Date(dateString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function applyDateFilter() {
+            const fromDate = document.getElementById('filterFromDate').value;
+            const toDate = document.getElementById('filterToDate').value;
+            
+            if (fromDate && toDate) {
+                if (new Date(fromDate) > new Date(toDate)) {
+                    alert('From date cannot be greater than To date!');
+                    return;
+                }
+                
+                currentFilter.fromDate = fromDate;
+                currentFilter.toDate = toDate;
+                
+                // Show filter summary and hide filter section
+                document.getElementById('filterSummary').style.display = 'block';
+                document.getElementById('dateFilterSection').style.display = 'none';
+                
+                // Format display text for filter summary
+                const fromDisplay = formatDateForDisplay(fromDate);
+                const toDisplay = formatDateForDisplay(toDate);
+                document.getElementById('filterRangeText').textContent = `${fromDisplay} to ${toDisplay}`;
+                
+                updateMemberDetail();
+                loadMemberTransactions();
+            } else {
+                alert('Please select both From and To dates!');
+            }
+        }
+
+        function clearDateFilter() {
+            document.getElementById('filterFromDate').value = '';
+            document.getElementById('filterToDate').value = '';
+            currentFilter.fromDate = null;
+            currentFilter.toDate = null;
+            
+            // Hide filter summary
+            document.getElementById('filterSummary').style.display = 'none';
+            
+            updateMemberDetail();
+            loadMemberTransactions();
+        }
+
+        // Member Management
+        function loadMembers() {
+            const memberList = document.getElementById('memberList');
+            
+            calculateAllMemberBalances();
+
+            if (parties.length === 0) {
+                memberList.innerHTML = `
+                    <div class="empty-state">
+                        <div>👥</div>
+                        <p class="mb-0">No members added yet</p>
+                        <small class="text-muted">Click "Add Member" to get started</small>
+                    </div>
+                `;
+                return;
+            }
+
+            memberList.innerHTML = parties.map(party => `
+                <div class="member-item">
+                    <div class="member-name" onclick="showMemberDetail(${JSON.stringify(party).replace(/"/g, '&quot;')})">${party.name}</div>
+                    <div class="member-balance ${party.balance >= 0 ? 'text-success' : 'text-danger'}">
+                        ₹${formatNumber(party.balance || 0)}
+                    </div>
+                    <div class="member-actions">
+                        <div class="dropdown">
+                            <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">⋯</button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="renameMember(${party.id})">Rename</a></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteMember(${party.id})">Delete</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function calculateAllMemberBalances() {
+            parties.forEach(party => {
+                const partyTransactions = transactions.filter(t => t.party === party.name);
+                
+                // Sort transactions by date to calculate balance correctly
+                partyTransactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                let balance = 0;
+                partyTransactions.forEach(transaction => {
+                    if (transaction.type === 'cash_in') {
+                        balance += transaction.amount;
+                    } else {
+                        balance -= transaction.amount;
+                    }
+                });
+                
+                party.balance = balance;
+            });
+            saveParties();
+        }
+
+        function showAddMemberForm() {
+            const memberName = prompt('Enter member name:');
+            if (memberName && memberName.trim()) {
+                const newParty = {
+                    id: Date.now(),
+                    name: memberName.trim(),
+                    createdDate: new Date().toLocaleDateString(),
+                    balance: 0
+                };
+                parties.push(newParty);
+                saveParties();
+                loadMembers();
+            }
+        }
+
+        function renameMember(partyId) {
+            const party = parties.find(p => p.id === partyId);
+            if (!party) return;
+            
+            const newName = prompt('Enter new name:', party.name);
+            if (newName && newName.trim()) {
+                // Update party name in transactions as well
+                transactions.forEach(transaction => {
+                    if (transaction.party === party.name) {
+                        transaction.party = newName.trim();
+                    }
+                });
+                
+                party.name = newName.trim();
+                saveParties();
+                saveTransactions();
+                loadMembers();
+                
+                if (currentParty && currentParty.id === partyId) {
+                    currentParty.name = newName.trim();
+                    document.getElementById('headerTitle').textContent = newName.trim();
+                }
+            }
+        }
+
+        function deleteMember(partyId) {
+            const party = parties.find(p => p.id === partyId);
+            if (!party) return;
+            
+            if (confirm(`Are you sure you want to delete "${party.name}"? All transactions will be deleted.`)) {
+                // Delete all transactions for this member
+                transactions = transactions.filter(t => t.party !== party.name);
+                
+                // Delete the member
+                parties = parties.filter(p => p.id !== partyId);
+                
+                saveParties();
+                saveTransactions();
+                loadMembers();
+                
+                if (currentParty && currentParty.id === partyId) {
+                    showMemberList();
+                }
+                
+                alert(`"${party.name}" has been deleted successfully!`);
+            }
+        }
+
+        // Member Detail Management - COMPLETELY REWRITTEN
+        function updateMemberDetail() {
+            if (!currentParty) return;
+            
+            // Get all transactions for this member
+            let memberTransactions = transactions.filter(t => t.party === currentParty.name);
+            
+            // Apply date filter if set
+            let filteredTransactions = [];
+            if (currentFilter.fromDate && currentFilter.toDate) {
+                filteredTransactions = memberTransactions.filter(t => 
+                    t.date >= currentFilter.fromDate && t.date <= currentFilter.toDate
+                );
+            } else {
+                // If no filter, show all transactions
+                filteredTransactions = [...memberTransactions];
+            }
+            
+            // Calculate opening balance (balance before the filter period)
+            let openingBalance = 0;
+            
+            if (currentFilter.fromDate) {
+                // Get all transactions before the filter start date
+                const transactionsBeforeFilter = memberTransactions.filter(t => t.date < currentFilter.fromDate);
+                
+                // Calculate opening balance from transactions before filter
+                transactionsBeforeFilter.forEach(transaction => {
+                    if (transaction.type === 'cash_in') {
+                        openingBalance += transaction.amount;
+                    } else {
+                        openingBalance -= transaction.amount;
+                    }
+                });
+            } else {
+                // If no filter, opening balance is 0 (starting balance)
+                openingBalance = 0;
+            }
+            
+            // Calculate totals from filtered transactions only
+            const totalIn = filteredTransactions
+                .filter(t => t.type === 'cash_in')
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            const totalOut = filteredTransactions
+                .filter(t => t.type === 'cash_out')
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            // Calculate current balance
+            const currentBalance = openingBalance + totalIn - totalOut;
+
+            // Update UI with formatted numbers
+            document.getElementById('detailOpeningBalance').textContent = '₹' + formatNumber(openingBalance);
+            document.getElementById('detailTotalIn').textContent = '₹' + formatNumber(totalIn);
+            document.getElementById('detailTotalOut').textContent = '₹' + formatNumber(totalOut);
+            document.getElementById('detailRemainingBalance').textContent = '₹' + formatNumber(currentBalance);
+        }
+
+        // Transaction Management
+        function showTransactionForm(type) {
+            if (!currentParty) return;
+            
+            editingTransaction = null;
+            document.getElementById('transactionForm').style.display = 'block';
+            document.getElementById('transactionType').value = type;
+            document.getElementById('formTitle').textContent = `${type === 'cash_in' ? 'Cash In' : 'Cash Out'} - ${currentParty.name}`;
+            document.getElementById('saveTransactionBtn').textContent = 'Save Transaction';
+        }
+
+        function hideTransactionForm() {
+            document.getElementById('transactionForm').style.display = 'none';
+            document.getElementById('transactionFormElement').reset();
+            document.getElementById('editingTransactionId').value = '';
+            editingTransaction = null;
+        }
+
+        // EDIT TRANSACTION FEATURE
+        function editTransaction(transactionId) {
+            const transaction = transactions.find(t => t.id === transactionId);
+            if (!transaction) return;
+            
+            editingTransaction = transaction;
+            
+            document.getElementById('transactionForm').style.display = 'block';
+            document.getElementById('transactionType').value = transaction.type;
+            document.getElementById('formTitle').textContent = `Edit Transaction - ${currentParty.name}`;
+            document.getElementById('saveTransactionBtn').textContent = 'Update Transaction';
+            
+            // Pre-fill form with transaction data
+            document.getElementById('amount').value = transaction.amount;
+            document.getElementById('comment').value = transaction.comment || '';
+            document.getElementById('transactionDate').value = transaction.date;
+            document.getElementById('editingTransactionId').value = transaction.id;
+        }
+
+        document.getElementById('transactionFormElement').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('amount').value);
+            const comment = document.getElementById('comment').value;
+            const date = document.getElementById('transactionDate').value;
+            const type = document.getElementById('transactionType').value;
+            const editingId = document.getElementById('editingTransactionId').value;
+
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount!');
+                return;
+            }
+
+            if (editingId) {
+                // Update existing transaction
+                updateTransaction(editingId, amount, comment, date, type);
+            } else {
+                // Create new transaction
+                const transaction = {
+                    id: Date.now(),
+                    amount: amount,
+                    party: currentParty.name,
+                    comment: comment,
+                    date: date,
+                    type: type,
+                    timestamp: new Date().toISOString()
+                };
+
+                saveTransaction(transaction);
+            }
+        });
+
+        function updateTransaction(transactionId, newAmount, newComment, newDate, newType) {
+            const transactionIndex = transactions.findIndex(t => t.id == transactionId);
+            if (transactionIndex === -1) return;
+            
+            const oldTransaction = transactions[transactionIndex];
+            
+            // Update transaction
+            transactions[transactionIndex] = {
+                ...oldTransaction,
+                amount: newAmount,
+                comment: newComment,
+                date: newDate,
+                type: newType
+            };
+            
+            saveTransactions();
+            loadMemberTransactions();
+            updateMemberDetail();
+            hideTransactionForm();
+            loadMembers(); // Update member list balances
+        }
+
+        function saveTransaction(transaction) {
+            transactions.push(transaction);
+            saveTransactions();
+            loadMemberTransactions();
+            updateMemberDetail();
+            hideTransactionForm();
+            
+            // Update member balance
+            updateMemberBalance(transaction.party, transaction.amount, transaction.type);
+        }
+
+        function updateMemberBalance(memberName, amount, type) {
+            let party = parties.find(p => p.name === memberName);
+            if (!party) return;
+            
+            if (type === 'cash_in') {
+                party.balance += amount;
+            } else {
+                party.balance -= amount;
+            }
+            
+            saveParties();
+            loadMembers();
+        }
+
+        function deleteTransaction(transactionId) {
+            if (confirm('Are you sure you want to delete this transaction?')) {
+                const transaction = transactions.find(t => t.id === transactionId);
+                
+                if (transaction && transaction.party) {
+                    // Remove transaction effect from balance
+                    if (transaction.type === 'cash_in') {
+                        updateMemberBalance(transaction.party, -transaction.amount, 'cash_out');
+                    } else {
+                        updateMemberBalance(transaction.party, -transaction.amount, 'cash_in');
+                    }
+                }
+                
+                // Delete transaction
+                transactions = transactions.filter(t => t.id !== transactionId);
+                
+                saveTransactions();
+                loadMemberTransactions();
+                updateMemberDetail();
+            }
+        }
+
+        // SHARE TRANSACTION FEATURE
+        function shareTransaction(transactionId) {
+            const transaction = transactions.find(t => t.id === transactionId);
+            if (!transaction) return;
+            
+            // Get all transactions for this party
+            const partyTransactions = transactions.filter(t => t.party === transaction.party);
+            
+            // Sort by date and time
+            partyTransactions.sort((a, b) => {
+                const dateCompare = new Date(a.date) - new Date(b.date);
+                if (dateCompare === 0) {
+                    return a.id - b.id;
+                }
+                return dateCompare;
+            });
+            
+            // Calculate opening balance (balance before this transaction)
+            let openingBalance = 0;
+            for (let t of partyTransactions) {
+                if (t.id === transaction.id) break;
+                
+                if (t.type === 'cash_in') {
+                    openingBalance += t.amount;
+                } else {
+                    openingBalance -= t.amount;
+                }
+            }
+            
+            // Calculate current balance (after this transaction)
+            let currentBalance = openingBalance;
+            if (transaction.type === 'cash_in') {
+                currentBalance += transaction.amount;
+            } else {
+                currentBalance -= transaction.amount;
+            }
+            
+            // Fill modal with data
+            document.getElementById('sharePartyName').textContent = transaction.party;
+            document.getElementById('shareDate').textContent = transaction.date;
+            document.getElementById('shareOpeningBalance').textContent = '₹' + formatNumber(openingBalance);
+            
+            if (transaction.type === 'cash_in') {
+                document.getElementById('shareAmount').textContent = '+₹' + formatNumber(transaction.amount);
+                document.getElementById('shareAmount').className = 'share-amount text-success';
+                document.getElementById('shareTypeLabel').textContent = 'Today Received';
+                document.getElementById('shareTransactionAmount').textContent = '₹' + formatNumber(transaction.amount);
+            } else {
+                document.getElementById('shareAmount').textContent = '-₹' + formatNumber(transaction.amount);
+                document.getElementById('shareAmount').className = 'share-amount text-danger';
+                document.getElementById('shareTypeLabel').textContent = 'Today Paid';
+                document.getElementById('shareTransactionAmount').textContent = '₹' + formatNumber(transaction.amount);
+            }
+            
+            document.getElementById('shareCurrentBalance').textContent = '₹' + formatNumber(currentBalance);
+            
+            // Show comment if exists
+            if (transaction.comment && transaction.comment.trim() !== '') {
+                document.getElementById('shareCommentText').textContent = transaction.comment;
+                document.getElementById('shareComment').style.display = 'block';
+            } else {
+                document.getElementById('shareComment').style.display = 'none';
+            }
+            
+            document.getElementById('shareGeneratedDate').textContent = new Date().toLocaleDateString();
+            
+            // Show modal
+            const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+            shareModal.show();
+        }
+
+        // DAY SUMMARY SHARE FEATURE
+        function shareDaySummary(date) {
+            if (!currentParty) return;
+            
+            // Get all transactions for this party on the specific date
+            const dayTransactions = transactions.filter(t => 
+                t.party === currentParty.name && t.date === date
+            );
+            
+            if (dayTransactions.length === 0) {
+                alert('No transactions found for this date!');
+                return;
+            }
+            
+            // Get all transactions for this party before the selected date
+            const transactionsBeforeDate = transactions.filter(t => 
+                t.party === currentParty.name && t.date < date
+            );
+            
+            // Calculate opening balance (balance before this date)
+            let openingBalance = 0;
+            transactionsBeforeDate.forEach(transaction => {
+                if (transaction.type === 'cash_in') {
+                    openingBalance += transaction.amount;
+                } else {
+                    openingBalance -= transaction.amount;
+                }
+            });
+            
+            // Calculate total cash in and cash out for the day
+            let totalIn = 0;
+            let totalOut = 0;
+            
+            dayTransactions.forEach(transaction => {
+                if (transaction.type === 'cash_in') {
+                    totalIn += transaction.amount;
+                } else {
+                    totalOut += transaction.amount;
+                }
+            });
+            
+            // Calculate current balance (after all transactions of the day)
+            const currentBalance = openingBalance + totalIn - totalOut;
+            
+            // Fill modal with data
+            document.getElementById('daySummaryMember').textContent = currentParty.name;
+            document.getElementById('daySummaryDate').textContent = formatDateForDisplay(date);
+            document.getElementById('daySummaryOpeningBalance').textContent = '₹ ' + formatNumber(openingBalance);
+            document.getElementById('daySummaryCurrentBalance').textContent = '₹ ' + formatNumber(currentBalance);
+            
+            // Add transactions to the summary
+            const transactionsContainer = document.getElementById('daySummaryTransactions');
+            transactionsContainer.innerHTML = '';
+            
+            dayTransactions.forEach(transaction => {
+                const transactionRow = document.createElement('div');
+                transactionRow.className = 'day-summary-row';
+                
+                const label = document.createElement('span');
+                label.className = 'day-summary-label';
+                label.textContent = transaction.comment || (transaction.type === 'cash_in' ? 'Today Received' : 'Cash Out');
+                
+                const amount = document.createElement('span');
+                amount.className = `day-summary-amount ${transaction.type === 'cash_in' ? 'day-summary-positive' : 'day-summary-negative'}`;
+                amount.textContent = `${transaction.type === 'cash_in' ? '+' : '-'} ₹ ${formatNumber(transaction.amount)}`;
+                
+                transactionRow.appendChild(label);
+                transactionRow.appendChild(amount);
+                transactionsContainer.appendChild(transactionRow);
+            });
+            
+            document.getElementById('daySummaryGeneratedDate').textContent = new Date().toLocaleDateString();
+            
+            // Show modal
+            const daySummaryModal = new bootstrap.Modal(document.getElementById('daySummaryModal'));
+            daySummaryModal.show();
+        }
+
+        // IMAGE DOWNLOAD FUNCTIONS
+        function downloadShareAsImage() {
+            const element = document.querySelector('#shareModal .share-card');
+            downloadElementAsImage(element, 'transaction-receipt.png');
+        }
+
+        function downloadDaySummaryAsImage() {
+            const element = document.getElementById('daySummaryCard');
+            downloadElementAsImage(element, 'day-summary.png');
+        }
+
+        function downloadElementAsImage(element, filename) {
+            html2canvas(element, {
+                scale: 2, // Higher quality
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function loadMemberTransactions() {
+            const transactionHistory = document.getElementById('transactionHistory');
+            
+            if (!currentParty) {
+                transactionHistory.innerHTML = '<div class="empty-state">Select a member</div>';
+                return;
+            }
+
+            let memberTransactions = transactions.filter(t => t.party === currentParty.name);
+
+            // Apply date filter if set
+            if (currentFilter.fromDate && currentFilter.toDate) {
+                memberTransactions = memberTransactions.filter(t => 
+                    t.date >= currentFilter.fromDate && t.date <= currentFilter.toDate
+                );
+            }
+
+            if (memberTransactions.length === 0) {
+                transactionHistory.innerHTML = `
+                    <div class="empty-state">
+                        <div>💸</div>
+                        <p class="mb-0">No transactions found</p>
+                        <small class="text-muted">${currentFilter.fromDate ? 'Try changing the date filter' : 'Add transactions using Cash In or Cash Out'}</small>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort by date (newest first)
+            memberTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Group by date
+            const transactionsByDate = {};
+            memberTransactions.forEach(transaction => {
+                if (!transactionsByDate[transaction.date]) {
+                    transactionsByDate[transaction.date] = [];
+                }
+                transactionsByDate[transaction.date].push(transaction);
+            });
+
+            // Display by date groups
+            let html = '';
+            Object.keys(transactionsByDate).sort((a, b) => new Date(b) - new Date(a)).forEach(date => {
+                html += `
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <strong>${formatDate(date)}</strong>
+                        <button class="date-share-button" onclick="shareDaySummary('${date}')">📤 Share Day</button>
+                    </div>
+                `;
+                
+                transactionsByDate[date].forEach(transaction => {
+                    html += `
+                        <div class="transaction-item ${transaction.type === 'cash_in' ? '' : 'cash-out'}">
+                            <div class="transaction-actions">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">⋯</button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" onclick="shareTransaction(${transaction.id})">Share</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="editTransaction(${transaction.id})">Edit</a></li>
+                                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteTransaction(${transaction.id})">Delete</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="mb-1">${transaction.comment || 'No remark'}</div>
+                                    <small class="text-muted">${transaction.date}</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="${transaction.type === 'cash_in' ? 'text-success' : 'text-danger'} fw-bold fs-5">
+                                        ${transaction.type === 'cash_in' ? '+' : '-'}₹${formatNumber(transaction.amount)}
+                                    </div>
+                                    <small class="text-muted">${transaction.type === 'cash_in' ? 'Cash In' : 'Cash Out'}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            transactionHistory.innerHTML = html;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            if (date.toDateString() === today.toDateString()) {
+                return 'Today';
+            } else if (date.toDateString() === yesterday.toDateString()) {
+                return 'Yesterday';
+            } else {
+                return date.toLocaleDateString();
+            }
+        }
+
+        // PDF Download Functions - COMPLETELY REWRITTEN
+        function downloadPDF() {
+            generatePDF(false);
+        }
+
+        function downloadFilteredPDF() {
+            generatePDF(true);
+        }
+
+        function generatePDF(useFilter) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Header
+            doc.setFontSize(20);
+            doc.setTextColor(0, 0, 128);
+            doc.text('BUSINESS REPORT', 105, 15, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 25, { align: 'center' });
+            
+            if (currentParty) {
+                doc.text(`Member: ${currentParty.name}`, 105, 32, { align: 'center' });
+                
+                // Get all transactions for this member
+                let memberTransactions = transactions.filter(t => t.party === currentParty.name);
+                
+                // Apply date filter if requested
+                if (useFilter && currentFilter.fromDate && currentFilter.toDate) {
+                    memberTransactions = memberTransactions.filter(t => 
+                        t.date >= currentFilter.fromDate && t.date <= currentFilter.toDate
+                    );
+                    
+                    // Add filter info
+                    doc.text(`Date Range: ${formatDateForDisplay(currentFilter.fromDate)} to ${formatDateForDisplay(currentFilter.toDate)}`, 105, 39, { align: 'center' });
+                }
+                
+                // Calculate summary data
+                let openingBalance = 0;
+                let totalIn = 0;
+                let totalOut = 0;
+                
+                if (useFilter && currentFilter.fromDate) {
+                    // Calculate opening balance (transactions before filter)
+                    const transactionsBeforeFilter = transactions.filter(t => 
+                        t.party === currentParty.name && t.date < currentFilter.fromDate
+                    );
+                    
+                    transactionsBeforeFilter.forEach(transaction => {
+                        if (transaction.type === 'cash_in') {
+                            openingBalance += transaction.amount;
+                        } else {
+                            openingBalance -= transaction.amount;
+                        }
+                    });
+                }
+                
+                // Calculate totals from filtered transactions
+                memberTransactions.forEach(transaction => {
+                    if (transaction.type === 'cash_in') {
+                        totalIn += transaction.amount;
+                    } else {
+                        totalOut += transaction.amount;
+                    }
+                });
+                
+                const finalBalance = openingBalance + totalIn - totalOut;
+                
+                // Add summary table
+                const summaryData = [
+                    ['Closing Balance', '₹ ' + formatNumber(openingBalance)],
+                    ['Cash In', '₹ ' + formatNumber(totalIn)],
+                    ['Cash Out', '₹ ' + formatNumber(totalOut)],
+                    ['Final Balance', '₹ ' + formatNumber(finalBalance)]
+                ];
+                
+                // Add summary title
+                doc.setFontSize(16);
+                doc.text('Summary', 14, useFilter && currentFilter.fromDate ? 55 : 50);
+                
+                // Add summary table
+                doc.autoTable({
+                    startY: useFilter && currentFilter.fromDate ? 60 : 55,
+                    body: summaryData,
+                    theme: 'grid',
+                    styles: { 
+                        fontSize: 12, 
+                        cellPadding: 5,
+                        lineWidth: 0.5
+                    },
+                    columnStyles: {
+                        0: { fontStyle: 'bold', cellWidth: 60 },
+                        1: { fontStyle: 'bold', cellWidth: 40 }
+                    },
+                    margin: { top: 10 }
+                });
+                
+                // Sort transactions by date for table
+                const sortedTransactions = [...memberTransactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                let runningBalance = openingBalance;
+                const tableData = sortedTransactions.map((transaction, index) => {
+                    const openingBalanceForRow = runningBalance;
+                    
+                    if (transaction.type === 'cash_in') {
+                        runningBalance += transaction.amount;
+                    } else {
+                        runningBalance -= transaction.amount;
+                    }
+                    
+                    return [
+                        index + 1,
+                        transaction.date,
+                        '₹' + formatNumber(openingBalanceForRow),
+                        transaction.type === 'cash_in' ? '₹' + formatNumber(transaction.amount) : '-',
+                        transaction.type === 'cash_out' ? '₹' + formatNumber(transaction.amount) : '-',
+                        '₹' + formatNumber(runningBalance),
+                        transaction.comment || '-'
+                    ];
+                });
+                
+                // Add transaction table
+                if (tableData.length > 0) {
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 10,
+                        head: [['SR', 'Date', 'Opening', 'Cash In', 'Cash Out', 'Balance', 'Remark']],
+                        body: tableData,
+                        theme: 'grid',
+                        headStyles: { 
+                            fillColor: [0, 123, 255],
+                            textColor: 255,
+                            fontStyle: 'bold'
+                        },
+                        styles: { 
+                            fontSize: 8, 
+                            cellPadding: 2
+                        },
+                        pageBreak: 'auto'
+                    });
+                }
+            } else {
+                // All members summary
+                const memberData = parties.map(party => [
+                    party.name,
+                    '₹' + formatNumber(party.balance || 0)
+                ]);
+                
+                doc.autoTable({
+                    startY: 40,
+                    head: [['Member', 'Balance']],
+                    body: memberData,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [0, 123, 255],
+                        textColor: 255,
+                        fontStyle: 'bold'
+                    }
+                });
+            }
+            
+            let fileName = currentParty ? `${currentParty.name}-report.pdf` : 'members-report.pdf';
+            
+            if (useFilter && currentFilter.fromDate && currentFilter.toDate) {
+                fileName = `${currentParty.name}-${currentFilter.fromDate}-to-${currentFilter.toDate}.pdf`;
+            }
+            
+            doc.save(fileName);
+        }
+
+        // Local Storage
+        function saveParties() {
+            localStorage.setItem('parties', JSON.stringify(parties));
+        }
+
+        function saveTransactions() {
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        // Back button event
+        document.getElementById('backButton').addEventListener('click', showMemberList);
+    </script>
+</body>
+</html>

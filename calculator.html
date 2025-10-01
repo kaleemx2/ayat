@@ -1,0 +1,609 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!-- ======================= HTML ======================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern Product Billing</title>
+
+<!-- CSS File -->
+<link rel="stylesheet" href="style.css">
+
+<!-- jQuery & jQuery UI -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+
+<!-- html2canvas for screenshot -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+<div class="container" id="billing-container">
+
+  <button class="screenshot-btn" id="screenshot-btn">
+    <i class="fa fa-camera"></i> 
+  </button>
+
+  <div class="header">
+    <input type="text" id="name" placeholder="PATIENT NAME">
+  </div>
+
+  <!-- SIMPLIFIED DATE & TOTAL PRODUCTS -->
+  <div class="info-section" id="simplified-info">
+    <div id="date-display"></div>
+ <!-- <div id="total-products-display"></div> -->
+  </div> 
+
+  <table class="products-table">
+    <thead>
+      <tr>
+        <th>Product Name</th>
+        <th>MRP (₹)</th>
+        <th>Qty</th>
+        <th>Total (₹)</th>
+      </tr>
+    </thead>
+    <tbody id="products-body">
+      <tr>
+        <td><input type="text" class="product-search" placeholder="Search product..."></td>
+        <td><span class="mrp-display">0.00</span></td>
+        <td><input type="number" class="quantity-input" placeholder=""></td>
+        <td><span class="total-display">₹0.00</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SIMPLIFIED DATE & TOTAL PRODUCTS -->
+  <div class="info-section" id="simplified-info">
+  <!--  <div id="date-display"></div> -->
+    <div id="total-products-display"></div>
+  </div>
+
+  <div class="action-buttons">
+    <button class="btn btn-add" id="add-row"><i class="fa fa-plus"></i> Add Row</button>
+    <button class="btn btn-clear" id="clear-all"><i class="fa fa-trash"></i> Clear All</button>
+  </div>
+
+  <div class="summary-section">
+    <div class="summary-row"><span>Total All</span><span id="subtotal">₹0.00</span></div>
+    <div class="summary-row"><span>Dis. %</span>
+      <input type="number" class="discount-input" id="discount-percent" value="" min="0" max="100">
+    </div>
+    <div class="summary-row"><span>Discount</span><span id="discount-amount">₹0.00</span></div>
+    <div class="summary-row final-total"><span>Final Total</span><span id="final-total">₹0.00</span></div>
+  </div>
+</div>
+
+<!-- JS File -->
+<script src="script.js"></script>
+
+</body>
+</html><style>/* ======================= CSS ======================= */
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+body { background: #e0e5ec; padding: 10px; }
+
+.container {
+  background: #fff; 
+  border-radius: 12px; 
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  width: 100%; 
+  max-width: 760px; 
+  padding: 20px;
+}
+
+.header { text-align: center; margin-bottom: 15px; }
+.header input {
+  border: none; 
+  font-size: 24px; 
+  font-weight: 700; 
+  text-align: center;
+  width: 100%; 
+  border-bottom: 3px solid #ddd; 
+  padding: 8px; 
+  outline: none;
+  border-radius: 6px; 
+  background: #f8f8f8;
+}
+
+/* ======= Date and Coumt =======*/
+
+/* Container flex alignment */
+#simplified-info {
+  display: flex;
+  justify-content: flex-start; /* align items to left */
+  gap: 20px;
+  width: 100%;   /* ensure it takes full width */
+}
+
+/* Each info div */
+#simplified-info div {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  text-align: left;  /* force left alignment */
+  flex: 0 0 auto;    /* prevent flex item from shrinking too much */
+}
+  
+
+/* Modern table */
+.products-table { 
+  width: 100%; 
+  border-collapse: separate; 
+  border-spacing: 0 8px; 
+  margin-bottom: 15px; 
+}
+.products-table th, .products-table td {
+  padding: 10px 8px; font-size: 15px; text-align: left;
+}
+.products-table th { background: #f1f3f6; color: #555; font-weight: 600; }
+.products-table td { background: #f9f9f9; border-radius: 8px; vertical-align: middle; }
+
+.product-search { 
+  width: 100%; 
+  padding: 10px; 
+  border: 1px solid #ccc; 
+  border-radius: 8px; 
+  }
+  
+  
+.quantity-input {
+  width: 60px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 700;   /* bold */
+  font-size: 15px;
+  background-color: #f8d7da; /* red background for blank */
+  color: #721c24;            /* dark red text for blank */
+  transition: background 0.3s, color 0.3s;
+}
+
+/* When user types something (input is not blank) */
+.quantity-input:not(:placeholder-shown) {
+  background-color: #fff; /* normal white background */
+  color: #000;
+}
+
+
+.mrp-display, .total-display { display: block; text-align: right; font-weight: 600; color: #222; }
+
+/* Buttons modern & small */
+.action-buttons { display: flex; justify-content: flex-end; gap: 170px; margin-bottom: 15px; }
+.btn { padding: 6px 12px; font-size: 13px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.btn-clear { background: #ff6b6b; color: #fff; }
+.btn-add { background: #1dd1a1; color: #fff; }
+
+/* Summary section */
+.summary-section { margin-top: 10px; }
+.summary-row { 
+  display: flex; 
+  justify-content: space-between; 
+  padding: 6px 0; 
+  font-size: 14px; 
+  }
+  
+  /* Make amounts bold in summary */
+.summary-row span:last-child {
+  font-weight: 700;   /* bold */
+  color: #000;        /* optional: dark color */
+}
+
+
+/* Exclude Final Total */
+.summary-row.final-total span:last-child {
+  font-weight: 700;    /* keep bold if you want */
+  color: #1976d2;      /* original blue color */
+}
+
+/* Optional: increase font size for Total All and Discount amounts */
+#subtotal, #discount-amount {
+  font-size: 16px;
+}
+  
+.final-total { border-top: 2px solid #ddd; 
+  margin-top: 8px; 
+  font-size: 16px; 
+  font-weight: 700; 
+  color: #1976d2; 
+  }
+.discount-input { 
+  width: 60px; 
+  padding: 4px; 
+  border: 1px solid #ddd; 
+  border-radius: 6px; 
+  text-align: center; 
+  background: #fff; 
+  color: #000; 
+  }
+
+/* Responsive mobile */
+@media (max-width: 600px) {
+  .info-section { justify-content: center; }
+  .action-buttons { flex-direction: row; justify-content: space-between; }
+  .btn { flex: 1; justify-content: center; font-size: 14px; padding: 8px 14px; }
+  .products-table td { font-size: 14px; padding: 8px; }
+  .product-search { padding: 8px; font-size: 14px; }
+  .quantity-input { width: 50px; padding: 4px; }
+}
+
+.screenshot-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: #1976d2; color: #fff; border: none; padding: 6px 12px; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px;
+}
+.screenshot-btn:hover { background: #125aa0; }</style><script>/* ======================= JS ======================= */
+$(document).ready(function() {
+
+  // ================= DATE DISPLAY =================
+  const today = new Date();
+  const formattedDate = today.getFullYear() + "/" + 
+                        String(today.getMonth() + 1).padStart(2, '0') + "/" +
+                        String(today.getDate()).padStart(2, '0');
+  $('#date-display').text("Date: " + formattedDate);
+
+// ================= PRODUCTS LIST =================
+const products = [
+  { name: "1 ALL 5", mrp: 3.8 },
+  { name: "ACERD", mrp: 1.50 },
+  { name: "ACINIL O 120", mrp: 135.90 },
+  { name: "ACINIL O 200", mrp: 201 },
+  { name: "ACOFEROL 6L INJ", mrp: 59 },
+  { name: "ACOLAN TR", mrp: 12 },
+  { name: "AKURIT 3 TAB", mrp: 7.56 },
+  { name: "AKURIT 4 TAB", mrp: 10 },
+  { name: "ALKASOL", mrp: 143 },
+  { name: "AMINOFIT", mrp: 26.73 },
+  { name: "AMITAG 10MG TAB", mrp: 2.70 },
+  { name: "AMITAG 25MG TAB", mrp: 3 },
+  { name: "AMLOKIND 5MG TAB", mrp: 1.7 },
+  { name: "AMLOKIND AT TAB", mrp: 4.50 },
+  { name: "Amlovas 10", mrp: 2 },
+  { name: "Amlovas 5", mrp: 3 },
+  { name: "ANOPLUS TAB", mrp: 5 },
+  { name: "ARGIPREG ST", mrp: 64.90 },
+  { name: "Aristozyme Drops", mrp: 2 },
+  { name: "Astymin C Drops", mrp: 2 },
+  { name: "ATOWISH F TAB", mrp: 9 },
+  { name: "AUGMENTIN 1G", mrp: 66.1 },
+  { name: "AVIL 25", mrp: 0.80 },
+  { name: "Axbex Susp 100ml", mrp: 2 },
+  { name: "Axbex Susp 200ml", mrp: 2 },
+  { name: "BACZIN 10MG", mrp: 13.50 },
+  { name: "BANDAGE 4", mrp: 8 },
+  { name: "BECASULE", mrp: 3 },
+  { name: "BECASULE Z", mrp: 3 },
+  { name: "BENADON TAB", mrp: 3 },
+  { name: "BENTILIDE TAB", mrp: 5 },
+  { name: "BETNISOL", mrp: 1.13 },
+  { name: "Bethadoxin 12", mrp: 101 },
+  { name: "Bethadoxin P", mrp: 101 },
+  { name: "BON NXT TAB", mrp: 65.20 },
+  { name: "CALWART K2 TAB", mrp: 18.50 },
+  { name: "CEFJUST 500", mrp: 32 },
+  { name: "CEFJUST 250", mrp: 16 },
+  { name: "CEFZIM 200", mrp: 11 },
+  { name: "CELIN 500", mrp: 2 },
+  { name: "CeffKid 125mg", mrp: 11 },
+  { name: "Chericof 12 Susp", mrp: 2 },
+  { name: "Chericof 60ml", mrp: 140 },
+  { name: "CIPLADINE 10G", mrp: 35 },
+  { name: "CIPLAR 10", mrp: 1.50 },
+  { name: "Clarigard 500", mrp: 35 },
+  { name: "Clavcare 625", mrp: 18.50 },
+  { name: "CLINTON TRIO", mrp: 154 },
+  { name: "CO TRIMOXAZOLE", mrp: 2.50 },
+  { name: "COMBIFLAM", mrp: 3 },
+  { name: "COMBUTOL 1000", mrp: 16 },
+  { name: "COMBUTOL 800", mrp: 5.20 },
+  { name: "Colimex Drops", mrp: 2 },
+  { name: "COMPLAMINA RET", mrp: 19.7 },
+  { name: "CYPON SYP", mrp: 100 },
+  { name: "Cynocal 16", mrp: 2.50 },
+  { name: "Cynocal Plus", mrp: 3 },
+  { name: "Cypon Drops", mrp: 2 },
+  { name: "Cypon H 200ml", mrp: 2 },
+  { name: "Cypon H Plus Drop", mrp: 2 },
+  { name: "CYRA D", mrp: 5 },
+  { name: "CYTLOC", mrp: 21 },
+  { name: "DALACIN C 300", mrp: 30 },
+  { name: "DECDAN B 4MG INJ", mrp: 5.50 },
+  { name: "DEFCORT 6", mrp: 15 },
+  { name: "Deplatt A 75", mrp: 2 },
+  { name: "DOPLUS DT .", mrp: 8 },
+  { name: "DOROCLINE 100", mrp: 3.50 },
+  { name: "DOXY PLUS LB", mrp: 9 },
+  { name: "DYTOR 10", mrp: 7 },
+  { name: "DYTOR 5", mrp: 5.50 },
+  { name: "ECOSPRIN 75", mrp: 0.40 },
+  { name: "Ecosprin Av 150/20 ", mrp: 2 },
+  { name: "Ecosprin Av 75", mrp: 2 },
+  { name: "Esolembic D", mrp: 2 },
+  { name: "ETOS 60", mrp: 5.50 },
+  { name: "ETROBAX 90", mrp: 19.7 },
+  { name: "Etrobax 60", mrp: 13.65 },
+  { name: "Etizola Plus 5mg", mrp: 2 },
+  { name: "EVION 400", mrp: 4.50 },
+  { name: "EVION LC", mrp: 7 },
+  { name: "FCN 150", mrp: 13.50 },
+  { name: "Feboxa 40", mrp: 2 },
+  { name: "Flexon Mr Tab", mrp: 2 },
+  { name: "FOLITRAX 7.5 MTX", mrp: 16.50 },
+  { name: "FOLVITE", mrp: 1.7 },
+  { name: "Fusigin Cream", mrp: 54 },
+  { name: "Fusiwal Cream", mrp: 54 },
+  { name: "GABANEURON ", mrp: 21.50 },
+  { name: "GABANEURON SR", mrp: 38.50 },
+  { name: "GESTASTAT 200", mrp: 30 },
+  { name: "Glizid Total P 15", mrp: 12.90 },
+  { name: "HAEM UP", mrp: 3.63 },
+  { name: "HCG 5000", mrp: 458 },
+  { name: "HCQS 200", mrp: 7.12 },
+  { name: "HEALTH OK", mrp: 36 },
+  { name: "HNORM RD", mrp: 5 },
+  { name: "IMACIN SR 75 ", mrp: 16.70 },
+  { name: "INDOMEG SR 75", mrp: 13 },
+  { name: "Iprazest Respules", mrp: 2 },
+  { name: "ISRIL M1 500", mrp: 3 },
+  { name: "Isryl M1 Forte", mrp: 5.80 },
+  { name: "Isryl M2", mrp: 2 },
+  { name: "Isryl M2 Forte", mrp: 6.67 },
+  { name: "KMet 500", mrp: 2 },
+  { name: "KVog 0.2", mrp: 2 },
+  { name: "LCIN 500", mrp: 10 },
+  { name: "LCIN 750", mrp: 16 },
+  { name: "Levomac 500", mrp: 10 },
+  { name: "LEVOSIZ 10", mrp: 3.50 },
+  { name: "Lexa 10", mrp: 2 },
+  { name: "LIBOTRYP", mrp: 5.50 },
+  { name: "Lincotus Dx", mrp: 125 },
+  { name: "LIZOSPEY 600", mrp: 38 },
+  { name: "Loxof 500", mrp: 10 },
+  { name: "LUTIGEST 500", mrp: 260 },
+  { name: "M2TONE", mrp: 152 },
+  { name: "Macbate Susp", mrp: 2 },
+  { name: "Macpod 100", mrp: 15.50 },
+  { name: "Macpod 50", mrp: 9.50 },
+  { name: "Mactor 10", mrp: 2 },
+  { name: "Mactor 20", mrp: 2 },
+  { name: "MAHAFLOX 400", mrp: 24.50 },
+  { name: "MEDROTRIL", mrp: 6.90 },
+  { name: "MEFTAL FORTE", mrp: 4.60 },
+  { name: "Meftal Spas15ml", mrp: 5 },
+  { name: "MELSONE 4", mrp: 4 },
+  { name: "METROGIL 200", mrp: 0.90 },
+  { name: "METROGIL 400", mrp: 1.75 },
+  { name: "METHYGENE", mrp: 10 },
+  { name: "Metomac 25", mrp: 2 },
+  { name: "MIKACIN 100", mrp: 2 },
+  { name: "MIKACIN 250", mrp: 2 },
+  { name: "MIKACIN 500", mrp: 60 },
+  { name: "MISOPROST 200", mrp: 21 },
+  { name: "MITHCAL MOM", mrp: 155 },
+  { name: "MOBIWIN D TAB", mrp: 19.50 },
+  { name: "MOLIPRIDE 25", mrp: 4.50 },
+  { name: "Monocan 200", mrp: 25 },
+  { name: "MONOCEF 1G", mrp: 50 },
+  { name: "MONOCEF 250", mrp: 2 },
+  { name: "MONOCEF 500", mrp: 2 },
+  { name: "Montemac Fx", mrp: 2 },
+  { name: "MYLAMIN CAP", mrp: 7.50 },
+  { name: "NAPROSYN 250", mrp: 8 },
+  { name: "NAPROSYN 500", mrp: 10.57 },
+  { name: "NAPROSYN 750", mrp: 9 },
+  { name: "NEOSPORIN OINT", mrp: 131 },
+  { name: "NERVIC OD", mrp: 17.50 },
+  { name: "NEUROBION FORTE", mrp: 1.50 },
+  { name: "NIDOGEN 500", mrp: 260 },
+  { name: "Normaxin Rt", mrp: 6.50 },
+  { name: "NU ALL D60 1G", mrp: 22 },
+  { name: "NVG", mrp: 11.66 },
+  { name: "OCID L", mrp: 21 },
+  { name: "Odoxil 500", mrp: 7.50 },
+  { name: "OFLOWIN 400", mrp: 13.50 },
+  { name: "Oflomac 200", mrp: 9.70 },
+  { name: "Oflomac 300", mrp: 16 },
+  { name: "Oflomac M Forte", mrp: 97 },
+  { name: "Oflomac M Syp", mrp: 69.50 },
+  { name: "OLEPTAL 150 TAB", mrp: 10 },
+  { name: "OLEPTAL  300", mrp: 16.50 },
+  { name: "OLIDIC GEL", mrp: 85 },
+  { name: "OMEE CAP", mrp: 3.30 },
+  { name: "OMEE D CAP", mrp: 6.50 },
+  { name: "Omnacortil Drops", mrp: 2 },
+  { name: "Omnacortil Syp 60ml", mrp: 2 },
+  { name: "Osil Cap", mrp: 2 },
+  { name: "Osil Cream 30gm", mrp: 2 },
+  { name: "OSSO XT TAB", mrp: 9 },
+  { name: "OSSOPAN D SYP", mrp: 18.50 },
+  { name: "OSTA D3 INJ 1ML", mrp: 59 },
+  { name: "OSTEOFOS 70", mrp: 86 },
+  { name: "OSTOCALCIUM", mrp: 221.91 },
+  { name: "OVACARE", mrp: 27.66 },
+  { name: "OVRAL L", mrp: 66.50 },
+  { name: "P PPI 40", mrp: 4.50 },
+  { name: "PLACIDA 10", mrp: 9.65 },
+  { name: "POLMAFORCE", mrp: 12 },
+  { name: "Prax A 75", mrp: 2 },
+  { name: "PROSTAGARD 8", mrp: 22.50 },
+  { name: "PROTHIADEN", mrp: 13 },
+  { name: "PROTHIADEN 75", mrp: 27.20 },
+  { name: "PYZINA 1000", mrp: 11 },
+  { name: "PYZINA 750", mrp: 6.75 },
+  { name: "Raciper 40", mrp: 12 },
+  { name: "RANTAC 150", mrp: 1.7 },
+  { name: "RANTAC 300", mrp: 3.2 },
+  { name: "RANTAC OD", mrp: 8 },
+  { name: "RCIN 600", mrp: 9.50 },
+  { name: "RCINEX 600", mrp: 17.7 },
+  { name: "REJOINT NEW", mrp: 48.75 },
+  { name: "ROZOTIL MD", mrp: 8 },
+  { name: "SAAZ DS", mrp: 17.5 },
+  { name: "Serenace 0.25", mrp: 2.50 },
+  { name: "Shelcal 500", mrp: 10.50 },
+  { name: "Shelcal Hd", mrp: 2 },
+  { name: "SHOVITAL GOLD", mrp: 23.5 },
+  { name: "Sporidex Cv 375", mrp: 26 },
+  { name: "Sporidex Paed Drops", mrp: 2 },
+  { name: "SPPIL", mrp: 9 },
+  { name: "STEMETIL MD", mrp: 13 },
+  { name: "Superspas Rf", mrp: 6.80 },
+  { name: "SURECOX 90", mrp: 10 },
+  { name: "TBECT CRM", mrp: 115 },
+  { name: "Telvas 3d", mrp: 2 },
+  { name: "Telvas 40", mrp: 2 },
+  { name: "Telvas Am", mrp: 2 },
+  { name: "Telvas Beta 25", mrp: 2 },
+  { name: "Telvas H 40/12.5", mrp: 2 },
+  { name: "Tenefit M Forte", mrp: 2 },
+  { name: "Terbitotal 250", mrp: 15 },
+  { name: "Terbitotal 500", mrp: 27 },
+  { name: "TERMADURE PLUS", mrp: 9.29 },
+  { name: "Thyrox 100", mrp: 2 },
+  { name: "Thyrox 12.5", mrp: 2 },
+  { name: "Thyrox 125", mrp: 2 },
+  { name: "Thyrox 25", mrp: 2 },
+  { name: "Thyrox 50", mrp: 2 },
+  { name: "TOPP 40", mrp: 4.50 },
+  { name: "TRYPTOMER 10", mrp: 3 },
+  { name: "TRYPTOMER 25", mrp: 3 },
+  { name: "Ulgeraft Syp", mrp: 167 },
+  { name: "Ulvin 500mg", mrp: 14.50 },
+  { name: "UNIBEE LC", mrp: 13 },
+  { name: "URIHOLD S 25", mrp: 2 },
+  { name: "URIMAX 0.4 CAP", mrp: 17.30 },
+  { name: "URIMAX D", mrp: 41.75 },
+  { name: "VERTIGON 25", mrp: 6.50 },
+  { name: "VERTIGON 75", mrp: 9.60 },
+  { name: "VETORI 90", mrp: 11 },
+  { name: "VH3", mrp: 100 },
+  { name: "VILDAGARD 1000", mrp: 12.33 },
+  { name: "Vildagard M 50/500", mrp: 2 },
+  { name: "VIZYLAC CAP", mrp: 6.1 },
+  { name: "VOLITRA APS", mrp: 348 },
+  { name: "XOCLAVE 625", mrp: 18.50 },
+  { name: "Zedocef 200", mrp: 20.50 },
+  { name: "Zedott 30 Dt", mrp: 17 }
+];
+
+  // ================= AUTOCOMPLETE =================
+  function initAutocompleteForRow(row) {
+    row.find('.product-search').autocomplete({
+      source: function(request, response) {
+        const term = request.term.toLowerCase();
+        const matches = products.filter(p => p.name.toLowerCase().includes(term)).map(p => p.name);
+        response(matches);
+      },
+      minLength: 1,
+      select: function(e, ui) {
+        const product = products.find(p => p.name === ui.item.value);
+        if (product) {
+          row.find('.mrp-display').text(product.mrp.toFixed(2));
+          calculateRowTotal(row);
+        }
+      }
+    });
+  }
+
+  // ================= CALCULATE TOTALS =================
+  function calculateRowTotal(row) {
+    const mrp = parseFloat(row.find('.mrp-display').text()) || 0;
+    let qtyVal = parseInt(row.find('.quantity-input').val());
+    if (isNaN(qtyVal) || qtyVal <= 0) {
+      qtyVal = 0;
+      row.find('.quantity-input').val("");
+      row.find('.quantity-input').addClass("no-qty");
+    } else {
+      row.find('.quantity-input').removeClass("no-qty");
+    }
+    const total = mrp * qtyVal;
+    row.find('.total-display').text('₹' + total.toFixed(2));
+    calculateTotal();
+  }
+
+  function calculateTotal() {
+    let subtotal = 0;
+    let productCount = 0;
+    $('#products-body tr').each(function() {
+      const total = parseFloat($(this).find('.total-display').text().replace('₹','')) || 0;
+      const qtyVal = parseInt($(this).find('.quantity-input').val());
+      if (!isNaN(qtyVal) && qtyVal > 0) productCount++;
+      subtotal += total;
+    });
+    $('#subtotal').text('₹' + subtotal.toFixed(2));
+    const discountPercent = parseInt($('#discount-percent').val()) || 0;
+    const discountAmount = subtotal * (discountPercent/100);
+    $('#discount-amount').text('₹' + discountAmount.toFixed(2));
+    $('#final-total').text('₹' + (subtotal - discountAmount).toFixed(2));
+    $('#total-products-display').text("Count: " + productCount);
+  }
+
+  function attachEvents() {
+    $('.quantity-input').off().on('input', function() {
+      calculateRowTotal($(this).closest('tr'));
+    });
+  }
+  
+  
+
+  // ================= INITIALIZE =================
+  initAutocompleteForRow($('#products-body tr'));
+  attachEvents();
+
+  $('#add-row').click(function() {
+    const newRow = $(`
+      <tr>
+        <td><input type="text" class="product-search" placeholder="Search product..."></td>
+        <td><span class="mrp-display">0.00</span></td>
+        <td><input type="number" class="quantity-input" placeholder=""></td>
+        <td><span class="total-display">₹0.00</span></td>
+      </tr>
+    `);
+    $('#products-body').append(newRow);
+    initAutocompleteForRow(newRow);
+    attachEvents();
+  });
+
+  $('#clear-all').click(function() {
+  // Clear all product rows
+  $('#products-body').empty();
+  $('#add-row').click(); // add a new empty row
+
+  // Reset header name
+  $('#name').val("");
+
+  // Reset discount percent
+  $('#discount-percent').val("");
+
+  // Recalculate totals
+  calculateTotal();
+});
+
+// ================= SCREENSHOT =================
+$('#screenshot-btn').click(function() {
+  const name = $('#name').val() || "NoName";
+
+  // Create YYYYMMDD format for date
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const dateStr = `${yyyy}${mm}${dd}`; // YYYYMMDD without separators
+
+  // Construct filename with one underscore
+  const fileName = `${name}_${dateStr}.png`;
+
+  html2canvas(document.querySelector("#billing-container")).then(canvas => {
+    const link = document.createElement("a");
+    link.download = fileName;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+});
+
+
+
+  $('#discount-percent').on('input', calculateTotal);
+});</script>

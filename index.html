@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Professional Multi-Page Index</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74ebd5, #9face6);
+            color: #333;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 50px 20px 80px; /* Bottom padding to avoid content hidden behind footer */
+            min-height: 100vh;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 40px;
+            font-weight: 700;
+            color: #222;
+        }
+        button {
+            background: linear-gradient(145deg, #4a90e2, #357ABD);
+            border: none;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            padding: 18px 50px;
+            margin: 15px 10px;
+            border-radius: 15px;
+            box-shadow: 5px 5px 10px #2c5cb7,
+                        -5px -5px 10px #6ba2f7;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        button:hover {
+            background: linear-gradient(145deg, #357ABD, #4a90e2);
+            box-shadow: inset 3px 3px 6px #2c5cb7,
+                        inset -3px -3px 6px #6ba2f7;
+            transform: translateY(-3px);
+        }
+        button:active {
+            transform: translateY(1px);
+            box-shadow: inset 1px 1px 5px #2c5cb7,
+                        inset -1px -1px 5px #6ba2f7;
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(135deg, #4a90e2, #357ABD);
+            color: white;
+            padding: 12px 10px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 -3px 10px rgba(53, 122, 189, 0.8);
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            z-index: 1000;
+            box-sizing: border-box;
+        }
+        footer span {
+            white-space: nowrap;
+        }
+        footer a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            white-space: nowrap;
+        }
+        footer a:hover {
+            color: #e0eaff;
+            text-decoration: underline;
+        }
+        @media (max-width: 480px) {
+            button {
+                font-size: 18px;
+                padding: 14px 30px;
+                margin: 10px 5px;
+            }
+            footer {
+                font-size: 12px;
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Amaan Medical Store</h1>
+
+<button onclick="window.location.href='calculator.html'">Calculator</button>
+<button onclick="window.location.href='store.html'">Transection</button>
+<button onclick="window.location.href='pdf.html'">PDF Converter</button>
+
+<footer>
+    <span id="footer-year"></span> &copy; Kaleem Khan |
+    <a href="about.html">About</a> |
+    <a href="contact.html">Contact</a> |
+</footer>
+
+<script>
+    const yearSpan = document.getElementById('footer-year');
+    yearSpan.textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
