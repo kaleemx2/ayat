@@ -1,117 +1,193 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Professional Multi-Page Index</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Tools Interface</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        html, body {
-            height: 100%;
+        * {
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #74ebd5, #9face6);
-            color: #333;
-        }
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            padding: 50px 20px 80px; /* Bottom padding to avoid content hidden behind footer */
-            min-height: 100vh;
+            padding: 0;
             box-sizing: border-box;
-            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        h1 {
-            margin-bottom: 40px;
-            font-weight: 700;
-            color: #222;
-        }
-        button {
-            background: linear-gradient(145deg, #4a90e2, #357ABD);
-            border: none;
-            color: white;
-            font-size: 22px;
-            font-weight: bold;
-            padding: 18px 50px;
-            margin: 15px 10px;
-            border-radius: 15px;
-            box-shadow: 5px 5px 10px #2c5cb7,
-                        -5px -5px 10px #6ba2f7;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-        button:hover {
-            background: linear-gradient(145deg, #357ABD, #4a90e2);
-            box-shadow: inset 3px 3px 6px #2c5cb7,
-                        inset -3px -3px 6px #6ba2f7;
-            transform: translateY(-3px);
-        }
-        button:active {
-            transform: translateY(1px);
-            box-shadow: inset 1px 1px 5px #2c5cb7,
-                        inset -1px -1px 5px #6ba2f7;
-        }
-        footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: linear-gradient(135deg, #4a90e2, #357ABD);
-            color: white;
-            padding: 12px 10px;
-            font-size: 14px;
-            font-weight: 600;
-            box-shadow: 0 -3px 10px rgba(53, 122, 189, 0.8);
-            user-select: none;
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            z-index: 1000;
-            box-sizing: border-box;
+            align-items: center;
+            padding: 20px;
         }
-        footer span {
-            white-space: nowrap;
+        
+        .mobile-container {
+            width: 100%;
+            max-width: 400px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            padding: 30px 20px;
+            position: relative;
         }
-        footer a {
-            color: rgba(255, 255, 255, 0.9);
+        
+        .mobile-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .mobile-header h1 {
+            font-size: 1.8rem;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .mobile-header p {
+            color: #666;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .mobile-button {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 15px;
+            padding: 18px 20px;
             text-decoration: none;
-            transition: color 0.3s ease;
-            white-space: nowrap;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
         }
-        footer a:hover {
-            color: #e0eaff;
-            text-decoration: underline;
+        
+        .mobile-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
-        @media (max-width: 480px) {
-            button {
-                font-size: 18px;
-                padding: 14px 30px;
-                margin: 10px 5px;
+        
+        .mobile-button:active {
+            transform: translateY(0);
+        }
+        
+        .button-1 {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+        }
+        
+        .button-2 {
+            background: linear-gradient(to right, #43e97b, #38f9d7);
+            color: white;
+        }
+        
+        .button-3 {
+            background: linear-gradient(to right, #fa709a, #fee140);
+            color: white;
+        }
+        
+        .button-icon {
+            margin-right: 15px;
+            font-size: 1.5rem;
+            width: 40px;
+            text-align: center;
+        }
+        
+        .desktop-message {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .desktop-message h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .desktop-message p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            .mobile-container {
+                display: block;
             }
-            footer {
-                font-size: 12px;
-                padding: 10px 8px;
+            
+            .desktop-message {
+                display: none;
             }
+        }
+        
+        /* Desktop styles */
+        @media (min-width: 769px) {
+            .mobile-container {
+                display: none;
+            }
+            
+            .desktop-message {
+                display: block;
+            }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-
-<h1>Amaan Medical Store</h1>
-
-<button onclick="window.location.href='calculator.html'">Calculator</button>
-<button onclick="window.location.href='store.html'">Transection</button>
-<button onclick="window.location.href='pdf.html'">PDF Converter</button>
-
-<footer>
-    <span id="footer-year"></span> &copy; Kaleem Khan |
-    <a href="about.html">About</a> |
-    <a href="contact.html">Contact</a> |
-</footer>
-
-<script>
-    const yearSpan = document.getElementById('footer-year');
-    yearSpan.textContent = new Date().getFullYear();
-</script>
-
+    <div class="mobile-container">
+        <div class="mobile-header">
+            <h1>Kaleem Khan</h1>
+            <p>O you who have believed, fear Allah and be with those who are truthful.</p>
+        </div>
+        
+        <div class="button-container">
+            <a href="store.html" class="mobile-button button-1">
+                <span class="button-icon"><i class="fas fa-heartbeat"></i></span>
+                <span>Medical Tools</span>
+            </a>
+            
+            <a href="calculator.html" class="mobile-button button-2">
+                <span class="button-icon"><i class="fas fa-calculator"></i></span>
+                <span>Calculator</span>
+            </a>
+            
+            <a href="pdf.html" class="mobile-button button-3">
+                <span class="button-icon"><i class="fas fa-file-pdf"></i></span>
+                <span>PDF to Text</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="desktop-message">
+        
+    </div>
+    
+    <div class="footer">
+        <p>Amaa Medical Store | Designed by Kaleem Khan</p>
+    </div>
 </body>
 </html>
