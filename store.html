@@ -1477,10 +1477,10 @@
                 
                 // Add summary table
                 const summaryData = [
-                    ['Closing Balance', '₹ ' + formatNumber(openingBalance)],
-                    ['Cash In', '₹ ' + formatNumber(totalIn)],
-                    ['Cash Out', '₹ ' + formatNumber(totalOut)],
-                    ['Final Balance', '₹ ' + formatNumber(finalBalance)]
+                    ['Closing Balance',  formatNumber(openingBalance)],
+                    ['Cash In',  formatNumber(totalIn)],
+                    ['Cash Out',  formatNumber(totalOut)],
+                    ['Final Balance',  formatNumber(finalBalance)]
                 ];
                 
                 // Add summary title
@@ -1520,10 +1520,10 @@
                     return [
                         index + 1,
                         transaction.date,
-                        '₹' + formatNumber(openingBalanceForRow),
-                        transaction.type === 'cash_in' ? '₹' + formatNumber(transaction.amount) : '-',
-                        transaction.type === 'cash_out' ? '₹' + formatNumber(transaction.amount) : '-',
-                        '₹' + formatNumber(runningBalance),
+                         formatNumber(openingBalanceForRow),
+                        transaction.type === 'cash_in' ?  formatNumber(transaction.amount) : '-',
+                        transaction.type === 'cash_out' ?  formatNumber(transaction.amount) : '-',
+                         formatNumber(runningBalance),
                         transaction.comment || '-'
                     ];
                 });
