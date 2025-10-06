@@ -12,18 +12,18 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        body {
+        html, body {
+            height: 100%;
             background-color: #f0f0f0;
             color: #333;
-            height: 100vh;
             overflow: hidden;
         }
 
         .app-container {
+            height: 100vh;
             max-width: 100%;
             margin: 0 auto;
             background: white;
-            height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -36,6 +36,7 @@
             font-size: 1.3rem;
             font-weight: bold;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
 
         .notepad-container {
@@ -63,14 +64,15 @@
         }
 
         .line input {
-            flex: 1;
-            padding: 10px 12px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: #fff;
-            margin: 0 8px;
-        }
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 25px;           /* Size badi karen */
+    font-weight: bold;         /* Text bold karen */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    margin: 0 8px;
+}
 
         .line-total {
             width: 100px;
@@ -90,6 +92,7 @@
             border-top: 2px solid #bdc3c7;
             font-weight: bold;
             font-size: 1.1rem;
+            flex-shrink: 0;
         }
 
         .keyboard-toggle {
@@ -113,6 +116,7 @@
             padding: 12px;
             background: #bdc3c7;
             border-top: 1px solid #95a5a6;
+            flex-shrink: 0;
         }
 
         .keypad button {
@@ -149,7 +153,7 @@
 
         .comment {
             font-style: italic;
-            color: #7f8c8d;
+            color: #7f8c8d !important;
         }
 
         .empty-output {
@@ -169,6 +173,32 @@
                 border-radius: 10px;
                 overflow: hidden;
                 box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            }
+        }
+
+        /* Mobile-specific fixes */
+        @media (max-width: 767px) and (max-height: 800px) {
+            .keypad {
+                padding: 8px;
+                gap: 4px;
+            }
+            
+            .keypad button {
+                padding: 10px 3px;
+                font-size: 1rem;
+            }
+            
+            .notepad-container {
+                padding: 8px;
+            }
+            
+            .line input {
+                padding: 8px 10px;
+                font-size: 15px;
+            }
+            
+            .total-bar {
+                padding: 12px;
             }
         }
     </style>
@@ -229,7 +259,7 @@
         function init() {
             loadFromStorage();
             if (lineCount === 0) {
-                addLine(true);
+                addLine(false);
             }
             setupEventListeners();
         }
@@ -336,42 +366,47 @@
             notepad.scrollTop = notepad.scrollHeight;
         }
 
-        // Format number display
+        // Format number display with thousands separators
         function formatNumber(num) {
-            return '₹ ' + Number(num).toLocaleString('en-IN', {
+            // Handle negative numbers
+            const isNegative = num < 0;
+            const absNum = Math.abs(num);
+            
+            // Format with thousands separators and one decimal place
+            const formatted = '₹ ' + absNum.toLocaleString('en-IN', {
                 minimumFractionDigits: 1,
                 maximumFractionDigits: 1
             });
+            
+            return isNegative ? '-' + formatted : formatted;
         }
 
         // Parse and evaluate expressions
         function parseExpression(expr) {
-            // Handle comments - if there's a : or ; anywhere, treat the entire line as a comment
-            if (expr.includes(':') || expr.includes(';')) {
-                return 0;
-            }
-            
             if (!expr || expr.trim() === '') return 0;
 
             // Replace operators
             expr = expr.replace(/×/g, '*').replace(/÷/g, '/');
 
-            // Replace ₹ references
-            expr = expr.replace(/₹([0-9]+)/g, (_, num) => {
+            // Handle line references with ₹
+            expr = expr.replace(/₹(\d+)/g, (_, num) => {
                 return lineResults[num] || 0;
             });
 
-            // Handle @rdown function
-            if (expr.includes('@rdown')) {
-                const match = expr.match(/@rdown\(([^,]+),\s*(\d+)\)/);
-                if (match) {
-                    const val = safeEval(match[1]);
-                    const decimals = parseInt(match[2]);
-                    return Math.floor(val * Math.pow(10, decimals)) / Math.pow(10, decimals);
+            // Handle @ functions (intermediate expressions)
+            if (expr.includes('@')) {
+                // Handle @rdown function
+                if (expr.includes('@rdown')) {
+                    const match = expr.match(/@rdown\(([^,]+),\s*(\d+)\)/);
+                    if (match) {
+                        const val = safeEval(match[1]);
+                        const decimals = parseInt(match[2]);
+                        return Math.floor(val * Math.pow(10, decimals)) / Math.pow(10, decimals);
+                    }
                 }
             }
 
-            // Handle sum function
+            // Handle sum function with comma as argument separator
             if (expr.includes('sum')) {
                 const match = expr.match(/sum\(([^)]+)\)/);
                 if (match) {
@@ -393,8 +428,12 @@
         // Safe evaluation
         function safeEval(expr) {
             try {
-                // Clean the expression
+                // Clean the expression - allow commas as decimal separators
                 expr = expr.replace(/[^0-9+\-*/().,\s]/g, '');
+                
+                // Handle comma as decimal separator
+                expr = expr.replace(/,/g, '.');
+                
                 return new Function(`return ${expr}`)();
             } catch {
                 return 0;
@@ -409,24 +448,45 @@
                 const lineNum = index + 1;
                 const input = line.querySelector('input');
                 const totalSpan = document.getElementById(`total-${lineNum}`);
+                const inputValue = input.value;
                 
-                // Check if it's a comment (contains : or ; anywhere)
-                const isComment = input.value.includes(':') || input.value.includes(';');
-                
-                if (isComment) {
+                // Check if line starts with colon (:) - FULL COMMENT
+                if (inputValue.trim().startsWith(':')) {
                     lineResults[lineNum] = 0;
                     totalSpan.textContent = '₹ 0.0';
                     totalSpan.classList.add('empty-output');
                     input.classList.add('comment');
-                } else {
+                } 
+                // Check if line contains semicolon (;) - RIGHT-SIDE COMMENT
+                else if (inputValue.includes(';')) {
+                    const semicolonIndex = inputValue.indexOf(';');
+                    const calculationPart = inputValue.substring(0, semicolonIndex).trim();
+                    
                     try {
-                        const result = parseExpression(input.value);
+                        const result = parseExpression(calculationPart);
+                        lineResults[lineNum] = result;
+                        totalSpan.textContent = formatNumber(result);
+                        totalSpan.classList.remove('empty-output');
+                        input.classList.add('comment');
+                        
+                        if (calculationPart.trim()) {
+                            finalTotal += result;
+                        }
+                    } catch {
+                        lineResults[lineNum] = 0;
+                        totalSpan.textContent = 'Error';
+                    }
+                } 
+                // Regular calculation without comments
+                else {
+                    try {
+                        const result = parseExpression(inputValue);
                         lineResults[lineNum] = result;
                         totalSpan.textContent = formatNumber(result);
                         totalSpan.classList.remove('empty-output');
                         input.classList.remove('comment');
                         
-                        if (input.value.trim()) {
+                        if (inputValue.trim()) {
                             finalTotal += result;
                         }
                     } catch {
@@ -461,13 +521,12 @@
             
             if (savedLines) {
                 const lines = JSON.parse(savedLines);
-                lines.forEach((line, index) => {
-                    if (index === 0) {
-                        addLine(false);
-                    } else {
-                        addLine(false);
-                    }
-                    const input = document.querySelector(`.line input[data-line="${index + 1}"]`);
+                lineCount = 0;
+                notepad.innerHTML = '';
+                
+                lines.forEach((line) => {
+                    addLine(false);
+                    const input = document.querySelector(`.line input[data-line="${lineCount}"]`);
                     if (input) {
                         input.value = line;
                         if (!isSystemKeyboardMode) {
