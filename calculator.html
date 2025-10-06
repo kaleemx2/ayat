@@ -1,570 +1,1237 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CalcNote Pro</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern Product Billing with Google Drive Sync</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* ======================= CSS ======================= */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+body { background: #e0e5ec; padding: 10px; }
+.container {
+  background: #fff; 
+  border-radius: 12px; 
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  width: 100%; 
+  max-width: 760px; 
+  padding: 20px;
+  position: relative;
+}
 
-        html, body {
-            height: 100%;
-            background-color: #f0f0f0;
-            color: #333;
-            overflow: hidden;
-        }
+.header { 
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px; 
+}
+.header input {
+  border: none; 
+  font-size: 24px; 
+  font-weight: 700; 
+  text-align: center;
+  width: 100%; 
+  border-bottom: 3px solid #ddd; 
+  padding: 8px; 
+  outline: none;
+  border-radius: 6px; 
+  background: #f8f8f8;
+  flex: 1;
+}
 
-        .app-container {
-            height: 100vh;
-            max-width: 100%;
-            margin: 0 auto;
-            background: white;
-            display: flex;
-            flex-direction: column;
-        }
+/* ======= Date and Count =======*/
+#simplified-info {
+  display: flex;
+  justify-content: flex-start;
+  gap: 20px;
+  width: 100%; 
+}
+#simplified-info div {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  text-align: left;
+  flex: 0 0 auto;  
+} 
 
-        header {
-            background: #4a6fa5;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 1.3rem;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-        }
+/* Modern table */
+.products-table { 
+  width: 100%; 
+  border-collapse: separate; 
+  border-spacing: 0 8px; 
+  margin-bottom: 15px; 
+}
+.products-table th, .products-table td {
+  padding: 10px 8px; font-size: 15px; text-align: left;
+}
+.products-table th { background: #f1f3f6; color: #555; font-weight: 600; }
+.products-table td { background: #f9f9f9; border-radius: 8px; vertical-align: middle; }
+.product-search { 
+  width: 100%; 
+  padding: 10px; 
+  border: 1px solid #ccc; 
+  border-radius: 8px; 
+}   
+  
+.quantity-input {
+  width: 60px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 700;  
+  font-size: 15px;
+  background-color: #f8d7da;
+  color: #721c24;
+  transition: background 0.3s, color 0.3s;
+}
+.quantity-input:not(:placeholder-shown) {
+  background-color: #fff;
+  color: #000;
+}
+.mrp-display, .total-display { display: block; text-align: right; font-weight: 600; color: #222; }
 
-        .notepad-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-            background: white;
-        }
+/* ================= BUTTON LAYOUT ================= */
+.action-buttons { 
+  display: flex; 
+  justify-content: space-between; 
+  gap: 15px; 
+  margin-bottom: 15px;
+  width: 100%;
+}
 
-        .line {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-            padding: 5px 0;
-            border-bottom: 1px solid #eee;
-        }
+.action-buttons .btn {
+  flex: 1;
+  justify-content: center;
+  min-width: 120px;
+}
 
-        .line-num {
-            width: 35px;
-            text-align: center;
-            color: #e74c3c;
-            font-weight: bold;
-            font-size: 0.9rem;
-            margin-right: 10px;
-        }
+.bottom-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 10px;
+  width: 100%;
+}
 
-        .line input {
-            flex: 1;
-            padding: 10px 12px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: #fff;
-            margin: 0 8px;
-        }
+.bottom-buttons .btn {
+  flex: 1;
+  justify-content: center;
+  min-width: 120px;
+}
 
-        .line-total {
-            width: 100px;
-            text-align: right;
-            padding: 10px 5px;
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 1rem;
-        }
+.btn { 
+  padding: 8px 16px; 
+  font-size: 14px; 
+  font-weight: 600; 
+  border: none; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  gap: 5px; 
+  transition: all 0.3s;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.btn-clear { background: #ff6b6b; color: #fff; }
+.btn-add { background: #1dd1a1; color: #fff; }
+.btn-save { background: #1976d2; color: #fff; }
+.btn-history { background: #ff9800; color: #fff; }
+.btn-sync { background: #9c27b0; color: #fff; }
+.btn-export { background: #4caf50; color: #fff; }
+.btn-import { background: #ff9800; color: #fff; }
 
-        .total-bar {
-            background: #ecf0f1;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 2px solid #bdc3c7;
-            font-weight: bold;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
+/* Summary section */
+.summary-section { margin-top: 10px; }
+.summary-row { 
+  display: flex; 
+  justify-content: space-between; 
+  padding: 8px 0; 
+  font-size: 14px; 
+  align-items: center;
+}   
+.summary-row span:last-child {
+  font-weight: 700;  
+  color: #000;
+}
+.summary-row.final-total span:last-child {
+  font-weight: 700;
+  color: #1976d2;
+}
+#subtotal, #discount-amount, #total-discount {
+  font-size: 16px;
+} 
 
-        .keyboard-toggle {
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+.final-total { 
+  border-top: 2px solid #ddd; 
+  margin-top: 8px; 
+  font-size: 16px; 
+  font-weight: 700; 
+  color: #1976d2; 
+}
+.discount-input { 
+  width: 70px; 
+  padding: 6px; 
+  border: 1px solid #ddd; 
+  border-radius: 6px; 
+  text-align: center; 
+  background: #fff; 
+  color: #000; 
+  font-weight: 600;
+}
 
-        .keypad {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            padding: 12px;
-            background: #bdc3c7;
-            border-top: 1px solid #95a5a6;
-            flex-shrink: 0;
-        }
+/* Divider */
+.divider {
+  height: 1px;
+  background: #ddd;
+  margin: 15px 0;
+}
 
-        .keypad button {
-            padding: 12px 5px;
-            font-size: 1.1rem;
-            border: none;
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
-            transition: all 0.2s;
-        }
+/* Responsive mobile */
+@media (max-width: 600px) {
+  .info-section { justify-content: center; }
+  .action-buttons { flex-direction: row; gap: 10px; }
+  .action-buttons .btn { min-width: 100px; font-size: 13px; padding: 8px 12px; }
+  .bottom-buttons { flex-direction: row; gap: 10px; }
+  .bottom-buttons .btn { min-width: 100px; font-size: 13px; padding: 8px 12px; }
+  .products-table td { font-size: 14px; padding: 8px; }
+  .product-search { padding: 8px; font-size: 14px; }
+  .quantity-input { width: 50px; padding: 4px; }
+  .header { flex-direction: column; gap: 10px; }
+  .header input { font-size: 20px; }
+}
 
-        .keypad button:active {
-            background: #e0e0e0;
-            transform: scale(0.95);
-        }
+@media (max-width: 400px) {
+  .action-buttons .btn, .bottom-buttons .btn { 
+    min-width: 90px; font-size: 12px; padding: 6px 10px; 
+  }
+}
 
-        .keypad .operator {
-            background: #3498db;
-            color: white;
-        }
+.screenshot-btn {
+  position: absolute; 
+  top: 10px; 
+  right: 10px;
+  background: #1976d2; 
+  color: #fff; 
+  border: none; 
+  padding: 8px 12px; 
+  font-size: 14px; 
+  font-weight: 600; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  gap: 5px;
+  transition: all 0.3s;
+}
+.screenshot-btn:hover { 
+  background: #125aa0; 
+  transform: translateY(-2px);
+}
 
-        .keypad .special {
-            background: #e67e22;
-            color: white;
-        }
+/* Status Messages */
+.status-message {
+  padding: 10px;
+  border-radius: 6px;
+  margin: 10px 0;
+  text-align: center;
+  font-weight: 600;
+}
 
-        .keypad .enter {
-            grid-column: span 2;
-            background: #27ae60;
-            color: white;
-        }
+.status-success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
 
-        .comment {
-            font-style: italic;
-            color: #7f8c8d !important;
-        }
+.status-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
 
-        .calculation-text {
-            color: #333 !important;
-        }
+.status-info {
+  background: #cce7ff;
+  color: #004085;
+  border: 1px solid #b3d7ff;
+}
 
-        .empty-output {
-            color: #95a5a6;
-        }
+.status-warning {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
 
-        @media (min-width: 768px) {
-            body {
-                padding: 10px;
-                background: #4a6fa5;
-            }
-            
-            .app-container {
-                max-width: 600px;
-                height: 95vh;
-                margin: 0 auto;
-                border-radius: 10px;
-                overflow: hidden;
-                box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            }
-        }
+/* Modal Styles */
+.modal {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: none;
+}
 
-        /* Mobile-specific fixes */
-        @media (max-width: 767px) and (max-height: 800px) {
-            .keypad {
-                padding: 8px;
-                gap: 4px;
-            }
-            
-            .keypad button {
-                padding: 10px 3px;
-                font-size: 1rem;
-            }
-            
-            .notepad-container {
-                padding: 8px;
-            }
-            
-            .line input {
-                padding: 8px 10px;
-                font-size: 15px;
-            }
-            
-            .total-bar {
-                padding: 12px;
-            }
-        }
-    </style>
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #000;
+}
+
+.history-item {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 10px 0;
+  background: #f9f9f9;
+}
+
+.history-date {
+  font-weight: bold;
+  color: #1976d2;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.history-products {
+  margin: 10px 0;
+}
+
+.history-product {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+  font-size: 14px;
+}
+
+.history-totals {
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.history-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.final-amount {
+  color: #1976d2;
+  font-size: 16px;
+}
+
+.discount-message {
+  font-size: 12px;
+  color: #28a745;
+  font-weight: 600;
+  margin-top: 5px;
+  text-align: center;
+  display: none;
+}
+
+.sync-status {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  z-index: 1001;
+}
+
+.backup-section {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 10px 0;
+  border: 1px solid #dee2e6;
+}
+
+.backup-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.backup-buttons .btn {
+  flex: 1;
+  justify-content: center;
+}
+</style>
 </head>
 <body>
-    <div class="app-container">
-        <header>CalcNote Pro</header>
-        
-        <div class="notepad-container" id="notepad">
-            <!-- Calculation lines will appear here -->
-        </div>
-        
-        <div class="total-bar">
-            <span>Final Total:</span>
-            <span id="finalTotal">тВ╣ 0.0</span>
-            <button class="keyboard-toggle" id="keyboard-toggle">тМия╕П</button>
-        </div>
-        
-        <div class="keypad">
-            <button data-value="7">7</button>
-            <button data-value="8">8</button>
-            <button data-value="9">9</button>
-            <button data-value="+" class="operator">+</button>
-            <button data-value="(" class="special">(</button>
-            
-            <button data-value="4">4</button>
-            <button data-value="5">5</button>
-            <button data-value="6">6</button>
-            <button data-value="-" class="operator">-</button>
-            <button data-value=")" class="special">)</button>
-            
-            <button data-value="1">1</button>
-            <button data-value="2">2</button>
-            <button data-value="3">3</button>
-            <button data-value="*" class="operator">├Ч</button>
-            <button data-value="," class="special">,</button>
-            
-            <button data-value="0">0</button>
-            <button data-value="00">00</button>
-            <button data-value=".">.</button>
-            <button data-value="/" class="operator">├╖</button>
-            <button data-value="backspace" class="special">тМл</button>
-            
-            <button data-value="enter" class="enter">Enter</button>
-        </div>
+<div class="container" id="billing-container">
+  <button class="screenshot-btn" id="screenshot-btn">
+    <i class="fa fa-camera"></i> Screenshot
+  </button>
+  
+  <div class="header">
+    <input type="text" id="name" placeholder="PATIENT NAME" list="patient-list">
+    <datalist id="patient-list"></datalist>
+  </div>
+  
+  <!-- SIMPLIFIED DATE & TOTAL PRODUCTS -->
+  <div class="info-section" id="simplified-info">
+    <div id="date-display"></div>
+  </div> 
+  
+  <table class="products-table">
+    <thead>
+      <tr>
+        <th>Product Name</th>
+        <th>MRP (₹)</th>
+        <th>Qty</th>
+        <th>Total (₹)</th>
+      </tr>
+    </thead>
+    <tbody id="products-body">
+      <tr>
+        <td><input type="text" class="product-search" placeholder="Search product..."></td>
+        <td><span class="mrp-display">0.00</span></td>
+        <td><input type="number" class="quantity-input" placeholder=""></td>
+        <td><span class="total-display">₹0.00</span></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <!-- SIMPLIFIED DATE & TOTAL PRODUCTS -->
+  <div class="info-section" id="simplified-info">
+    <div id="total-products-display"></div>
+  </div>
+  
+  <div class="action-buttons">
+    <button class="btn btn-add" id="add-row"><i class="fa fa-plus"></i> Add Row</button>
+    <button class="btn btn-clear" id="clear-all"><i class="fa fa-trash"></i> Clear All</button>
+  </div>
+  
+  <div class="summary-section">
+    <div class="summary-row"><span>Total All</span><span id="subtotal">₹0.00</span></div>
+    
+    <div class="summary-row">
+      <span>Dis. %</span>
+      <input type="number" class="discount-input" id="discount-percent" value="" min="0" max="100" placeholder="0">
+      <span>Dis. Amt (₹)</span>
+      <input type="number" class="discount-input" id="discount-flat" value="" min="0" placeholder="0">
+    </div>
+    
+    <div class="summary-row">
+      <span>Total Discount</span>
+      <span id="total-discount">₹0.00</span>
+    </div>
+    
+    <div class="summary-row final-total">
+      <span>Final Total</span>
+      <span id="final-total">₹0.00</span>
+    </div>
+    
+    <div id="discount-message" class="discount-message"></div>
+  </div>
+  
+  <div class="divider"></div>
+  
+  <div class="bottom-buttons">
+    <button class="btn btn-save" id="save-btn"><i class="fa fa-save"></i> Save</button>
+    <button class="btn btn-history" id="history-btn"><i class="fa fa-history"></i> History</button>
+    <button class="btn btn-sync" id="backup-btn"><i class="fa fa-download"></i> Backup</button>
+  </div>
+
+  <div id="status-message"></div>
+</div>
+
+<!-- Patient History Modal -->
+<div id="history-modal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h3>Patient History - <span id="history-patient-name"></span></h3>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<!-- Backup Modal -->
+<div id="backup-modal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h3><i class="fa fa-download"></i> Data Backup & Restore</h3>
+    
+    <div class="backup-section">
+      <h4><i class="fa fa-download"></i> Export Data</h4>
+      <p>Download all patient data as a backup file:</p>
+      <div class="backup-buttons">
+        <button class="btn btn-export" id="export-json"><i class="fa fa-file-code"></i> Export JSON</button>
+        <button class="btn btn-export" id="export-csv"><i class="fa fa-file-excel"></i> Export CSV</button>
+      </div>
     </div>
 
-    <script>
-        const notepad = document.getElementById('notepad');
-        const finalTotalDisplay = document.getElementById('finalTotal');
-        const keyboardToggle = document.getElementById('keyboard-toggle');
-        
-        let lineCount = 0;
-        const lineResults = {};
-        let isSystemKeyboardMode = false;
+    <div class="backup-section">
+      <h4><i class="fa fa-upload"></i> Import Data</h4>
+      <p>Restore patient data from backup file:</p>
+      <div class="backup-buttons">
+        <input type="file" id="import-file" accept=".json,.csv" style="display: none;">
+        <button class="btn btn-import" id="import-btn"><i class="fa fa-upload"></i> Import Backup</button>
+      </div>
+    </div>
 
-        // Initialize the app
-        function init() {
-            loadFromStorage();
-            if (lineCount === 0) {
-                addLine(false);
-            }
-            setupEventListeners();
-        }
+    <div class="backup-section">
+      <h4><i class="fa fa-info-circle"></i> Backup Status</h4>
+      <div id="backup-status" class="status-message status-info">
+        Last Backup: <span id="last-backup-time">Never</span><br>
+        Total Patients: <span id="backup-patient-count">0</span><br>
+        Total Records: <span id="backup-record-count">0</span>
+      </div>
+    </div>
 
-        // Set up event listeners
-        function setupEventListeners() {
-            // Keypad buttons
-            document.querySelectorAll('.keypad button').forEach(button => {
-                button.addEventListener('click', () => {
-                    const value = button.getAttribute('data-value');
-                    handleKeypadInput(value);
-                });
-            });
-            
-            // Keyboard toggle
-            keyboardToggle.addEventListener('click', toggleSystemKeyboard);
-        }
+    <div class="backup-section status-warning">
+      <h4><i class="fa fa-exclamation-triangle"></i> Important</h4>
+      <p>Regularly backup your data to avoid loss. Browser data can be cleared automatically.</p>
+    </div>
+  </div>
+</div>
 
-        // Handle keypad input
-        function handleKeypadInput(value) {
-            if (isSystemKeyboardMode) return;
-            
-            let activeInput = document.querySelector('.line input:focus');
-            if (!activeInput) {
-                const inputs = document.querySelectorAll('.line input');
-                activeInput = inputs[inputs.length - 1];
-                if (activeInput) activeInput.focus();
-            }
+<script>
+/* ======================= JS ======================= */
+$(document).ready(function() {
+  const DATA_PREFIX = "patient_history_";
 
-            if (!activeInput) return;
+  // ================= DATE DISPLAY =================
+  const today = new Date();
+  const formattedDate = today.getFullYear() + "/" + 
+                        String(today.getMonth() + 1).padStart(2, '0') + "/" + 
+                        String(today.getDate()).padStart(2, '0');
+  $('#date-display').text("Date: " + formattedDate);
 
-            switch(value) {
-                case 'backspace':
-                    activeInput.value = activeInput.value.slice(0, -1);
-                    break;
-                case 'enter':
-                    addLine(true);
-                    break;
-                case '+':
-                case '-':
-                case '*':
-                case '/':
-                    activeInput.value += ` ${value} `;
-                    break;
-                default:
-                    activeInput.value += value;
-            }
-            
-            updateTotals();
-            saveToStorage();
-            
-            // Keep focus on current input
-            activeInput.focus();
-        }
+  // ================= PRODUCTS LIST =================
+  const products = [
+    { name: "1 ALL 5", mrp: 3.8 },
+    { name: "ACERD", mrp: 1.50 },
+    { name: "ACINIL O 120", mrp: 135.90 },
+    { name: "ACINIL O 200", mrp: 201 },
+    { name: "ACOFEROL 6L INJ", mrp: 59 },
+    { name: "ACOLAN TR", mrp: 12 },
+    { name: "AKURIT 3 TAB", mrp: 7.56 },
+    { name: "AKURIT 4 TAB", mrp: 10 },
+    { name: "ALKASOL", mrp: 143 },
+    { name: "AMINOFIT", mrp: 26.73 },
+    { name: "AMITAG 10MG TAB", mrp: 2.70 },
+    { name: "AMITAG 25MG TAB", mrp: 3 },
+    { name: "AMLOKIND 5MG TAB", mrp: 1.7 },
+    { name: "AMLOKIND AT TAB", mrp: 4.50 },
+    { name: "Amlovas 10", mrp: 2 },
+    { name: "Amlovas 5", mrp: 3 },
+    { name: "ANOPLUS TAB", mrp: 5 },
+    { name: "ARGIPREG ST", mrp: 64.90 },
+    { name: "Aristozyme Drops", mrp: 2 },
+    { name: "Astymin C Drops", mrp: 2 },
+    { name: "ATOWISH F TAB", mrp: 9 },
+    { name: "AUGMENTIN 1G", mrp: 66.1 },
+    { name: "AVIL 25", mrp: 0.80 },
+    { name: "Axbex Susp 100ml", mrp: 2 },
+    { name: "Axbex Susp 200ml", mrp: 2 },
+    { name: "BACZIN 10MG", mrp: 13.50 },
+    { name: "BANDAGE 4", mrp: 8 },
+    { name: "BECASULE", mrp: 3 },
+    { name: "BECASULE Z", mrp: 3 },
+    { name: "BENADON TAB", mrp: 3 },
+    { name: "BENTILIDE TAB", mrp: 5 },
+    { name: "BETNISOL", mrp: 1.13 },
+    { name: "Bethadoxin 12", mrp: 101 },
+    { name: "Bethadoxin P", mrp: 101 },
+    { name: "BON NXT TAB", mrp: 65.20 },
+    { name: "CALWART K2 TAB", mrp: 18.50 },
+    { name: "CEFJUST 500", mrp: 32 },
+    { name: "CEFJUST 250", mrp: 16 },
+    { name: "CEFZIM 200", mrp: 11 },
+    { name: "CELIN 500", mrp: 2 },
+    { name: "CeffKid 125mg", mrp: 11 },
+    { name: "Chericof 12 Susp", mrp: 2 },
+    { name: "Chericof 60ml", mrp: 140 },
+    { name: "CIPLADINE 10G", mrp: 35 },
+    { name: "CIPLAR 10", mrp: 1.50 },
+    { name: "Clarigard 500", mrp: 35 },
+    { name: "Clavcare 625", mrp: 18.50 },
+    { name: "CLINTON TRIO", mrp: 154 },
+    { name: "CO TRIMOXAZOLE", mrp: 2.50 },
+    { name: "COMBIFLAM", mrp: 3 },
+    { name: "COMBUTOL 1000", mrp: 16 },
+    { name: "COMBUTOL 800", mrp: 5.20 },
+    { name: "Colimex Drops", mrp: 2 },
+    { name: "COMPLAMINA RET", mrp: 19.7 },
+    { name: "CYPON SYP", mrp: 100 },
+    { name: "Cynocal 16", mrp: 2.50 },
+    { name: "Cynocal Plus", mrp: 3 },
+    { name: "Cypon Drops", mrp: 2 },
+    { name: "Cypon H 200ml", mrp: 2 },
+    { name: "Cypon H Plus Drop", mrp: 2 },
+    { name: "CYRA D", mrp: 5 },
+    { name: "CYTLOC", mrp: 21 },
+    { name: "DALACIN C 300", mrp: 30 },
+    { name: "DECDAN B 4MG INJ", mrp: 5.50 },
+    { name: "DEFCORT 6", mrp: 15 },
+    { name: "Deplatt A 75", mrp: 2 },
+    { name: "DOPLUS DT .", mrp: 8 },
+    { name: "DOROCLINE 100", mrp: 3.50 },
+    { name: "DOXY PLUS LB", mrp: 9 },
+    { name: "DYTOR 10", mrp: 7 },
+    { name: "DYTOR 5", mrp: 5.50 },
+    { name: "ECOSPRIN 75", mrp: 0.40 },
+    { name: "Ecosprin Av 150/20 ", mrp: 2 },
+    { name: "Ecosprin Av 75", mrp: 2 },
+    { name: "Esolembic D", mrp: 2 },
+    { name: "ETOS 60", mrp: 5.50 },
+    { name: "ETROBAX 90", mrp: 19.7 },
+    { name: "Etrobax 60", mrp: 13.65 },
+    { name: "Etizola Plus 5mg", mrp: 2 },
+    { name: "EVION 400", mrp: 4.50 },
+    { name: "EVION LC", mrp: 7 },
+    { name: "FCN 150", mrp: 13.50 },
+    { name: "Feboxa 40", mrp: 2 },
+    { name: "Flexon Mr Tab", mrp: 2 },
+    { name: "FOLITRAX 7.5 MTX", mrp: 16.50 },
+    { name: "FOLVITE", mrp: 1.7 },
+    { name: "Fusigin Cream", mrp: 54 },
+    { name: "Fusiwal Cream", mrp: 54 },
+    { name: "GABANEURON ", mrp: 21.50 },
+    { name: "GABANEURON SR", mrp: 38.50 },
+    { name: "GESTASTAT 200", mrp: 30 },
+    { name: "Glizid Total P 15", mrp: 12.90 },
+    { name: "HAEM UP", mrp: 3.63 },
+    { name: "HCG 5000", mrp: 458 },
+    { name: "HCQS 200", mrp: 7.12 },
+    { name: "HEALTH OK", mrp: 36 },
+    { name: "HNORM RD", mrp: 5 },
+    { name: "IMACIN SR 75 ", mrp: 16.70 },
+    { name: "INDOMEG SR 75", mrp: 13 },
+    { name: "Iprazest Respules", mrp: 2 },
+    { name: "ISRIL M1 500", mrp: 3 },
+    { name: "Isryl M1 Forte", mrp: 5.80 },
+    { name: "Isryl M2", mrp: 2 },
+    { name: "Isryl M2 Forte", mrp: 6.67 },
+    { name: "KMet 500", mrp: 2 },
+    { name: "KVog 0.2", mrp: 2 },
+    { name: "LCIN 500", mrp: 10 },
+    { name: "LCIN 750", mrp: 16 },
+    { name: "Levomac 500", mrp: 10 },
+    { name: "LEVOSIZ 10", mrp: 3.50 },
+    { name: "Lexa 10", mrp: 2 },
+    { name: "LIBOTRYP", mrp: 5.50 },
+    { name: "Lincotus Dx", mrp: 125 },
+    { name: "LIZOSPEY 600", mrp: 38 },
+    { name: "Loxof 500", mrp: 10 },
+    { name: "LUTIGEST 500", mrp: 260 },
+    { name: "M2TONE", mrp: 152 },
+    { name: "Macbate Susp", mrp: 2 },
+    { name: "Macpod 100", mrp: 15.50 },
+    { name: "Macpod 50", mrp: 9.50 },
+    { name: "Mactor 10", mrp: 2 },
+    { name: "Mactor 20", mrp: 2 },
+    { name: "MAHAFLOX 400", mrp: 24.50 },
+    { name: "MEDROTRIL", mrp: 6.90 },
+    { name: "MEFTAL FORTE", mrp: 4.60 },
+    { name: "Meftal Spas15ml", mrp: 5 },
+    { name: "MELSONE 4", mrp: 4 },
+    { name: "METROGIL 200", mrp: 0.90 },
+    { name: "METROGIL 400", mrp: 1.75 },
+    { name: "METHYGENE", mrp: 10 },
+    { name: "Metomac 25", mrp: 2 },
+    { name: "MIKACIN 100", mrp: 2 },
+    { name: "MIKACIN 250", mrp: 2 },
+    { name: "MIKACIN 500", mrp: 60 },
+    { name: "MISOPROST 200", mrp: 21 },
+    { name: "MITHCAL MOM", mrp: 155 },
+    { name: "MOBIWIN D TAB", mrp: 19.50 },
+    { name: "MOLIPRIDE 25", mrp: 4.50 },
+    { name: "Monocan 200", mrp: 25 },
+    { name: "MONOCEF 1G", mrp: 50 },
+    { name: "MONOCEF 250", mrp: 2 },
+    { name: "MONOCEF 500", mrp: 2 },
+    { name: "Montemac Fx", mrp: 2 },
+    { name: "MYLAMIN CAP", mrp: 7.50 },
+    { name: "NAPROSYN 250", mrp: 8 },
+    { name: "NAPROSYN 500", mrp: 10.57 },
+    { name: "NAPROSYN 750", mrp: 9 },
+    { name: "NEOSPORIN OINT", mrp: 131 },
+    { name: "NERVIC OD", mrp: 17.50 },
+    { name: "NEUROBION FORTE", mrp: 1.50 },
+    { name: "NIDOGEN 500", mrp: 260 },
+    { name: "Normaxin Rt", mrp: 6.50 },
+    { name: "NU ALL D60 1G", mrp: 22 },
+    { name: "NVG", mrp: 11.66 },
+    { name: "OCID L", mrp: 21 },
+    { name: "Odoxil 500", mrp: 7.50 },
+    { name: "OFLOWIN 400", mrp: 13.50 },
+    { name: "Oflomac 200", mrp: 9.70 },
+    { name: "Oflomac 300", mrp: 16 },
+    { name: "Oflomac M Forte", mrp: 97 },
+    { name: "Oflomac M Syp", mrp: 69.50 },
+    { name: "OLEPTAL 150 TAB", mrp: 10 },
+    { name: "OLEPTAL  300", mrp: 16.50 },
+    { name: "OLIDIC GEL", mrp: 85 },
+    { name: "OMEE CAP", mrp: 3.30 },
+    { name: "OMEE D CAP", mrp: 6.50 },
+    { name: "Omnacortil Drops", mrp: 2 },
+    { name: "Omnacortil Syp 60ml", mrp: 2 },
+    { name: "Osil Cap", mrp: 2 },
+    { name: "Osil Cream 30gm", mrp: 2 },
+    { name: "OSSO XT TAB", mrp: 9 },
+    { name: "OSSOPAN D SYP", mrp: 18.50 },
+    { name: "OSTA D3 INJ 1ML", mrp: 59 },
+    { name: "OSTEOFOS 70", mrp: 86 },
+    { name: "OSTOCALCIUM", mrp: 221.91 },
+    { name: "OVACARE", mrp: 27.66 },
+    { name: "OVRAL L", mrp: 66.50 },
+    { name: "P PPI 40", mrp: 4.50 },
+    { name: "PLACIDA 10", mrp: 9.65 },
+    { name: "POLMAFORCE", mrp: 12 },
+    { name: "Prax A 75", mrp: 2 },
+    { name: "PROSTAGARD 8", mrp: 22.50 },
+    { name: "PROTHIADEN", mrp: 13 },
+    { name: "PROTHIADEN 75", mrp: 27.20 },
+    { name: "PYZINA 1000", mrp: 11 },
+    { name: "PYZINA 750", mrp: 6.75 },
+    { name: "Raciper 40", mrp: 12 },
+    { name: "RANTAC 150", mrp: 1.7 },
+    { name: "RANTAC 300", mrp: 3.2 },
+    { name: "RANTAC OD", mrp: 8 },
+    { name: "RCIN 600", mrp: 9.50 },
+    { name: "RCINEX 600", mrp: 17.7 },
+    { name: "REJOINT NEW", mrp: 48.75 },
+    { name: "ROZOTIL MD", mrp: 8 },
+    { name: "SAAZ DS", mrp: 17.5 },
+    { name: "Serenace 0.25", mrp: 2.50 },
+    { name: "Shelcal 500", mrp: 10.50 },
+    { name: "Shelcal Hd", mrp: 2 },
+    { name: "SHOVITAL GOLD", mrp: 23.5 },
+    { name: "Sporidex Cv 375", mrp: 26 },
+    { name: "Sporidex Paed Drops", mrp: 2 },
+    { name: "SPPIL", mrp: 9 },
+    { name: "STEMETIL MD", mrp: 13 },
+    { name: "Superspas Rf", mrp: 6.80 },
+    { name: "SURECOX 90", mrp: 10 },
+    { name: "TBECT CRM", mrp: 115 },
+    { name: "Telvas 3d", mrp: 2 },
+    { name: "Telvas 40", mrp: 2 },
+    { name: "Telvas Am", mrp: 2 },
+    { name: "Telvas Beta 25", mrp: 2 },
+    { name: "Telvas H 40/12.5", mrp: 2 },
+    { name: "Tenefit M Forte", mrp: 2 },
+    { name: "Terbitotal 250", mrp: 15 },
+    { name: "Terbitotal 500", mrp: 27 },
+    { name: "TERMADURE PLUS", mrp: 9.29 },
+    { name: "Thyrox 100", mrp: 2 },
+    { name: "Thyrox 12.5", mrp: 2 },
+    { name: "Thyrox 125", mrp: 2 },
+    { name: "Thyrox 25", mrp: 2 },
+    { name: "Thyrox 50", mrp: 2 },
+    { name: "TOPP 40", mrp: 4.50 },
+    { name: "TRYPTOMER 10", mrp: 3 },
+    { name: "TRYPTOMER 25", mrp: 3 },
+    { name: "Ulgeraft Syp", mrp: 167 },
+    { name: "Ulvin 500mg", mrp: 14.50 },
+    { name: "UNIBEE LC", mrp: 13 },
+    { name: "URIHOLD S 25", mrp: 2 },
+    { name: "URIMAX 0.4 CAP", mrp: 17.30 },
+    { name: "URIMAX D", mrp: 41.75 },
+    { name: "VERTIGON 25", mrp: 6.50 },
+    { name: "VERTIGON 75", mrp: 9.60 },
+    { name: "VETORI 90", mrp: 11 },
+    { name: "VH3", mrp: 100 },
+    { name: "VILDAGARD 1000", mrp: 12.33 },
+    { name: "Vildagard M 50/500", mrp: 2 },
+    { name: "VIZYLAC CAP", mrp: 6.1 },
+    { name: "VOLITRA APS", mrp: 348 },
+    { name: "XOCLAVE 625", mrp: 18.50 },
+    { name: "Zedocef 200", mrp: 20.50 },
+    { name: "Zedott 30 Dt", mrp: 17 },
+    { name: "ZYLORIC 100", mrp: 2 },
+  ];
 
-        // Toggle system keyboard
-        function toggleSystemKeyboard() {
-            isSystemKeyboardMode = !isSystemKeyboardMode;
-            
-            const inputs = document.querySelectorAll('.line input');
-            inputs.forEach(input => {
-                input.readOnly = !isSystemKeyboardMode;
-            });
-            
-            if (isSystemKeyboardMode) {
-                const lastInput = inputs[inputs.length - 1];
-                if (lastInput) lastInput.focus();
-                keyboardToggle.textContent = 'ЁЯУ▒';
-            } else {
-                keyboardToggle.textContent = 'тМия╕П';
-            }
-            
-            saveToStorage();
-        }
+  // ================= DATA STORAGE FUNCTIONS =================
+  
+  function getPatientFileName(patientName) {
+    const safeName = patientName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+    return `${DATA_PREFIX}${safeName}`;
+  }
 
-        // Add a new calculation line
-        function addLine(focus = false) {
-            lineCount++;
-            const line = document.createElement('div');
-            line.className = 'line';
-            line.innerHTML = `
-                <span class="line-num">${lineCount}</span>
-                <input type="text" data-line="${lineCount}" 
-                       placeholder="Enter calculation or :comment" 
-                       oninput="updateTotals()" />
-                <span class="line-total" id="total-${lineCount}">тВ╣ 0.0</span>
-            `;
-            notepad.appendChild(line);
-            
-            if (focus) {
-                const input = line.querySelector('input');
-                setTimeout(() => {
-                    input.focus();
-                    if (!isSystemKeyboardMode) {
-                        input.readOnly = true;
-                    }
-                }, 10);
-            }
-            
-            updateTotals();
-            saveToStorage();
-            
-            // Scroll to bottom
-            notepad.scrollTop = notepad.scrollHeight;
-        }
+  function loadPatientData(patientName) {
+    try {
+      const fileName = getPatientFileName(patientName);
+      const data = localStorage.getItem(fileName);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  }
 
-        // Format number display with thousands separators
-        function formatNumber(num) {
-            // Handle negative numbers
-            const isNegative = num < 0;
-            const absNum = Math.abs(num);
-            
-            // Format with thousands separators and one decimal place
-            const formatted = 'тВ╣ ' + absNum.toLocaleString('en-IN', {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1
-            });
-            
-            return isNegative ? '-' + formatted : formatted;
-        }
+  function savePatientData() {
+    const name = $('#name').val().trim();
+    if (!name) {
+      showStatus('Please enter patient name', 'error');
+      return;
+    }
 
-        // Parse and evaluate expressions
-        function parseExpression(expr) {
-            if (!expr || expr.trim() === '') return 0;
+    const today = new Date();
+    const dateStr = today.getFullYear() + "/" + 
+                    String(today.getMonth() + 1).padStart(2, '0') + "/" + 
+                    String(today.getDate()).padStart(2, '0');
+    
+    const timeStr = String(today.getHours()).padStart(2, '0') + ":" + 
+                    String(today.getMinutes()).padStart(2, '0') + ":" + 
+                    String(today.getSeconds()).padStart(2, '0');
 
-            // Replace operators
-            expr = expr.replace(/├Ч/g, '*').replace(/├╖/g, '/');
+    const billData = {
+      date: dateStr,
+      time: timeStr,
+      timestamp: today.getTime(),
+      products: [],
+      subtotal: parseFloat($('#subtotal').text().replace('₹','')) || 0,
+      discountPercent: parseInt($('#discount-percent').val()) || 0,
+      discountFlat: parseFloat($('#discount-flat').val()) || 0,
+      totalDiscount: parseFloat($('#total-discount').text().replace('₹','')) || 0,
+      finalTotal: parseFloat($('#final-total').text().replace('₹','')) || 0
+    };
 
-            // Handle line references with тВ╣
-            expr = expr.replace(/тВ╣(\d+)/g, (_, num) => {
-                return lineResults[num] || 0;
-            });
-
-            // Handle @ functions (intermediate expressions)
-            if (expr.includes('@')) {
-                // Handle @rdown function
-                if (expr.includes('@rdown')) {
-                    const match = expr.match(/@rdown\(([^,]+),\s*(\d+)\)/);
-                    if (match) {
-                        const val = safeEval(match[1]);
-                        const decimals = parseInt(match[2]);
-                        return Math.floor(val * Math.pow(10, decimals)) / Math.pow(10, decimals);
-                    }
-                }
-            }
-
-            // Handle sum function with comma as argument separator
-            if (expr.includes('sum')) {
-                const match = expr.match(/sum\(([^)]+)\)/);
-                if (match) {
-                    const refs = match[1].split(',').map(r => {
-                        const trimmed = r.trim();
-                        if (trimmed.startsWith('тВ╣')) {
-                            const refNum = trimmed.substring(1);
-                            return lineResults[refNum] || 0;
-                        }
-                        return safeEval(trimmed);
-                    });
-                    return refs.reduce((acc, val) => acc + val, 0);
-                }
-            }
-
-            return safeEval(expr);
-        }
-
-        // Safe evaluation
-        function safeEval(expr) {
-            try {
-                // Clean the expression - allow commas as decimal separators
-                expr = expr.replace(/[^0-9+\-*/().,\s]/g, '');
-                
-                // Handle comma as decimal separator
-                expr = expr.replace(/,/g, '.');
-                
-                return new Function(`return ${expr}`)();
-            } catch {
-                return 0;
-            }
-        }
-
-        // Update all totals
-        function updateTotals() {
-            let finalTotal = 0;
-            
-            document.querySelectorAll('.line').forEach((line, index) => {
-                const lineNum = index + 1;
-                const input = line.querySelector('input');
-                const totalSpan = document.getElementById(`total-${lineNum}`);
-                const inputValue = input.value;
-                
-                // Check for colon (:) first - if present anywhere, treat as full comment
-                if (inputValue.includes(':')) {
-                    lineResults[lineNum] = 0;
-                    totalSpan.textContent = 'тВ╣ 0.0';
-                    totalSpan.classList.add('empty-output');
-                    input.classList.add('comment');
-                    input.classList.remove('calculation-text');
-                } 
-                // Check for semicolon (;) - calculate part before semicolon
-                else if (inputValue.includes(';')) {
-                    const semicolonIndex = inputValue.indexOf(';');
-                    const calculationPart = inputValue.substring(0, semicolonIndex).trim();
-                    const commentPart = inputValue.substring(semicolonIndex);
-                    
-                    try {
-                        const result = parseExpression(calculationPart);
-                        lineResults[lineNum] = result;
-                        totalSpan.textContent = formatNumber(result);
-                        totalSpan.classList.remove('empty-output');
-                        
-                        // Apply special styling for semicolon case
-                        input.classList.add('comment');
-                        input.classList.add('calculation-text');
-                        
-                        if (calculationPart.trim()) {
-                            finalTotal += result;
-                        }
-                    } catch {
-                        lineResults[lineNum] = 0;
-                        totalSpan.textContent = 'Error';
-                    }
-                } 
-                // Regular calculation without comments
-                else {
-                    try {
-                        const result = parseExpression(inputValue);
-                        lineResults[lineNum] = result;
-                        totalSpan.textContent = formatNumber(result);
-                        totalSpan.classList.remove('empty-output');
-                        input.classList.remove('comment');
-                        input.classList.remove('calculation-text');
-                        
-                        if (inputValue.trim()) {
-                            finalTotal += result;
-                        }
-                    } catch {
-                        lineResults[lineNum] = 0;
-                        totalSpan.textContent = 'Error';
-                    }
-                }
-            });
-            
-            finalTotalDisplay.textContent = formatNumber(finalTotal);
-        }
-
-        // Save to localStorage
-        function saveToStorage() {
-            const lines = [];
-            document.querySelectorAll('.line input').forEach(input => {
-                lines.push(input.value);
-            });
-            localStorage.setItem('calcnote-pro-lines', JSON.stringify(lines));
-            localStorage.setItem('calcnote-pro-keyboard-mode', isSystemKeyboardMode);
-        }
-
-        // Load from localStorage
-        function loadFromStorage() {
-            const savedLines = localStorage.getItem('calcnote-pro-lines');
-            const savedKeyboardMode = localStorage.getItem('calcnote-pro-keyboard-mode');
-            
-            if (savedKeyboardMode) {
-                isSystemKeyboardMode = JSON.parse(savedKeyboardMode);
-                keyboardToggle.textContent = isSystemKeyboardMode ? 'ЁЯУ▒' : 'тМия╕П';
-            }
-            
-            if (savedLines) {
-                const lines = JSON.parse(savedLines);
-                lineCount = 0;
-                notepad.innerHTML = '';
-                
-                lines.forEach((line) => {
-                    addLine(false);
-                    const input = document.querySelector(`.line input[data-line="${lineCount}"]`);
-                    if (input) {
-                        input.value = line;
-                        if (!isSystemKeyboardMode) {
-                            input.readOnly = true;
-                        }
-                    }
-                });
-                updateTotals();
-            }
-        }
-
-        // Handle Enter key in inputs
-        function handleKey(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                addLine(true);
-            }
-        }
-
-        // Add global event listener for Enter key
-        document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT' && e.key === 'Enter') {
-                e.preventDefault();
-                addLine(true);
-            }
+    $('#products-body tr').each(function() {
+      const productName = $(this).find('.product-search').val();
+      const mrp = parseFloat($(this).find('.mrp-display').text()) || 0;
+      const quantity = parseInt($(this).find('.quantity-input').val()) || 0;
+      const total = parseFloat($(this).find('.total-display').text().replace('₹','')) || 0;
+      
+      if (productName && quantity > 0) {
+        billData.products.push({
+          name: productName,
+          mrp: mrp,
+          quantity: quantity,
+          total: total
         });
+      }
+    });
 
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+    if (billData.products.length === 0) {
+      showStatus('Please add at least one product', 'error');
+      return;
+    }
+
+    const patientData = loadPatientData(name);
+    patientData.push(billData);
+    
+    const fileName = getPatientFileName(name);
+    localStorage.setItem(fileName, JSON.stringify(patientData));
+    
+    showStatus(`Data saved for ${name} on ${dateStr} ${timeStr}`, 'success');
+    updatePatientList();
+    updateBackupStatus();
+  }
+
+  function updatePatientList() {
+    const patientNames = [];
+    
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(DATA_PREFIX)) {
+        const patientName = key.replace(DATA_PREFIX, '');
+        const displayName = patientName.replace(/_/g, ' ');
+        patientNames.push(displayName);
+      }
+    }
+    
+    patientNames.sort();
+    
+    const datalist = $('#patient-list');
+    datalist.empty();
+    
+    patientNames.forEach(name => {
+      datalist.append(`<option value="${name}">`);
+    });
+  }
+
+  function showPatientHistory() {
+    const name = $('#name').val().trim();
+    if (!name) {
+      showStatus('Please enter patient name', 'error');
+      return;
+    }
+
+    const patientData = loadPatientData(name);
+    
+    if (patientData.length === 0) {
+      showStatus('No history found for this patient', 'error');
+      return;
+    }
+
+    patientData.sort((a, b) => b.timestamp - a.timestamp);
+    
+    $('#history-patient-name').text(name);
+    const historyList = $('#history-list');
+    historyList.empty();
+    
+    patientData.forEach((record, index) => {
+      const historyItem = `
+        <div class="history-item">
+          <div class="history-date">
+            Date: ${record.date} Time: ${record.time}
+          </div>
+          <div class="history-products">
+            ${record.products.map(product => `
+              <div class="history-product">
+                <span>${product.name}</span>
+                <span>${product.quantity} × ₹${product.mrp.toFixed(2)} = ₹${product.total.toFixed(2)}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div class="history-totals">
+            <div class="history-total-row">
+              <span>Total Amount:</span>
+              <span>₹${record.subtotal.toFixed(2)}</span>
+            </div>
+            <div class="history-total-row">
+              <span>Discount (${record.discountPercent}% + ₹${record.discountFlat}):</span>
+              <span>₹${record.totalDiscount.toFixed(2)}</span>
+            </div>
+            <div class="history-total-row final-amount">
+              <span>Final Payable Amount:</span>
+              <span>₹${record.finalTotal.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      `;
+      historyList.append(historyItem);
+    });
+    
+    $('#history-modal').show();
+  }
+
+  function showStatus(message, type = 'info') {
+    const statusDiv = $('#status-message');
+    statusDiv.removeClass('status-success status-error status-info status-warning')
+             .addClass(`status-${type} status-message`)
+             .text(message)
+             .show();
+    
+    setTimeout(() => {
+      statusDiv.fadeOut();
+    }, 5000);
+  }
+
+  // ================= BACKUP & RESTORE FUNCTIONS =================
+  
+  function getAllPatientData() {
+    const allData = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(DATA_PREFIX)) {
+        const patientName = key.replace(DATA_PREFIX, '');
+        try {
+          allData[patientName] = JSON.parse(localStorage.getItem(key));
+        } catch (e) {
+          console.error('Error parsing data for:', patientName);
+        }
+      }
+    }
+    return allData;
+  }
+
+  function exportToJSON() {
+    const allData = getAllPatientData();
+    const dataStr = JSON.stringify(allData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `patient_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    // Update backup timestamp
+    localStorage.setItem('last_backup', new Date().toISOString());
+    updateBackupStatus();
+    
+    showStatus('Data exported successfully!', 'success');
+  }
+
+  function exportToCSV() {
+    const allData = getAllPatientData();
+    let csvContent = 'Patient Name,Date,Time,Product,MRP,Quantity,Total,Discount %,Discount Amount,Final Total\n';
+    
+    for (const patientName in allData) {
+      if (allData.hasOwnProperty(patientName)) {
+        const records = allData[patientName];
+        records.forEach(record => {
+          record.products.forEach(product => {
+            csvContent += `"${patientName.replace(/_/g, ' ')}","${record.date}","${record.time}","${product.name}",${product.mrp},${product.quantity},${product.total},${record.discountPercent},${record.discountFlat},${record.finalTotal}\n`;
+          });
+        });
+      }
+    }
+    
+    const dataBlob = new Blob([csvContent], {type: 'text/csv'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `patient_backup_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    localStorage.setItem('last_backup', new Date().toISOString());
+    updateBackupStatus();
+    
+    showStatus('CSV exported successfully!', 'success');
+  }
+
+  function importFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        
+        // Merge with existing data
+        const currentData = getAllPatientData();
+        const mergedData = {...currentData, ...importedData};
+        
+        // Clear existing data
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key.startsWith(DATA_PREFIX)) {
+            localStorage.removeItem(key);
+          }
+        }
+        
+        // Save merged data
+        for (const patientName in mergedData) {
+          if (mergedData.hasOwnProperty(patientName)) {
+            localStorage.setItem(DATA_PREFIX + patientName, JSON.stringify(mergedData[patientName]));
+          }
+        }
+        
+        updatePatientList();
+        updateBackupStatus();
+        showStatus('Data imported successfully!', 'success');
+        
+      } catch (error) {
+        showStatus('Error importing file: ' + error.message, 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function updateBackupStatus() {
+    const lastBackup = localStorage.getItem('last_backup');
+    if (lastBackup) {
+      $('#last-backup-time').text(new Date(lastBackup).toLocaleString());
+    } else {
+      $('#last-backup-time').text('Never');
+    }
+    
+    const allData = getAllPatientData();
+    const patientCount = Object.keys(allData).length;
+    const recordCount = Object.values(allData).reduce((total, records) => total + records.length, 0);
+    
+    $('#backup-patient-count').text(patientCount);
+    $('#backup-record-count').text(recordCount);
+  }
+
+  // ================= AUTOCOMPLETE =================
+  function initAutocompleteForRow(row) {
+    row.find('.product-search').autocomplete({
+      source: function(request, response) {
+        const term = request.term.toLowerCase();
+        const matches = products.filter(p => p.name.toLowerCase().includes(term)).map(p => p.name);
+        response(matches);
+      },
+      minLength: 1,
+      select: function(e, ui) {
+        const product = products.find(p => p.name === ui.item.value);
+        if (product) {
+          row.find('.mrp-display').text(product.mrp.toFixed(2));
+          calculateRowTotal(row);
+        }
+      }
+    });
+  }
+
+  // ================= CALCULATE TOTALS =================
+  function calculateRowTotal(row) {
+    const mrp = parseFloat(row.find('.mrp-display').text()) || 0;
+    let qtyVal = parseInt(row.find('.quantity-input').val());
+    if (isNaN(qtyVal) || qtyVal <= 0) {
+      qtyVal = 0;
+      row.find('.quantity-input').val("");
+      row.find('.quantity-input').addClass("no-qty");
+    } else {
+      row.find('.quantity-input').removeClass("no-qty");
+    }
+    const total = mrp * qtyVal;
+    row.find('.total-display').text('₹' + total.toFixed(2));
+    calculateTotal();
+  }
+
+  function calculateTotal() {
+    let subtotal = 0;
+    let productCount = 0;
+    $('#products-body tr').each(function() {
+      const total = parseFloat($(this).find('.total-display').text().replace('₹','')) || 0;
+      const qtyVal = parseInt($(this).find('.quantity-input').val());
+      if (!isNaN(qtyVal) && qtyVal > 0) productCount++;
+      subtotal += total;
+    });
+    
+    $('#subtotal').text('₹' + subtotal.toFixed(2));
+    
+    const discountPercent = parseInt($('#discount-percent').val()) || 0;
+    const discountFlat = parseFloat($('#discount-flat').val()) || 0;
+    
+    const discountFromPercent = subtotal * (discountPercent / 100);
+    const totalDiscount = discountFromPercent + discountFlat;
+    const finalTotal = Math.max(0, subtotal - totalDiscount);
+    
+    $('#total-discount').text('₹' + totalDiscount.toFixed(2));
+    $('#final-total').text('₹' + finalTotal.toFixed(2));
+    $('#total-products-display').text("Count: " + productCount);
+    
+    const discountMessage = $('#discount-message');
+    if (discountPercent > 0 || discountFlat > 0) {
+      let message = "";
+      if (discountPercent > 0 && discountFlat > 0) {
+        message = `Discount applied: ${discountPercent}% (₹${discountFromPercent.toFixed(2)}) + ₹${discountFlat.toFixed(2)} = ₹${totalDiscount.toFixed(2)}`;
+      } else if (discountPercent > 0) {
+        message = `Discount applied: ${discountPercent}% = ₹${discountFromPercent.toFixed(2)}`;
+      } else if (discountFlat > 0) {
+        message = `Discount applied: ₹${discountFlat.toFixed(2)}`;
+      }
+      discountMessage.text(message).show();
+    } else {
+      discountMessage.hide();
+    }
+  }
+
+  function attachEvents() {
+    $('.quantity-input').off().on('input', function() {
+      calculateRowTotal($(this).closest('tr'));
+    });
+  }
+
+  // ================= INITIALIZE =================
+  initAutocompleteForRow($('#products-body tr'));
+  attachEvents();
+  
+  updatePatientList();
+  updateBackupStatus();
+  
+  $('#save-btn').click(savePatientData);
+  $('#history-btn').click(showPatientHistory);
+  $('#backup-btn').click(function() {
+    $('#backup-modal').show();
+  });
+  
+  // Backup functionality
+  $('#export-json').click(exportToJSON);
+  $('#export-csv').click(exportToCSV);
+  $('#import-btn').click(function() {
+    $('#import-file').click();
+  });
+  
+  $('#import-file').change(function(e) {
+    if (e.target.files.length > 0) {
+      importFromFile(e.target.files[0]);
+    }
+  });
+
+  $('.close').click(function() {
+    $('#history-modal, #backup-modal').hide();
+  });
+  
+  $(window).click(function(event) {
+    if ($(event.target).is('.modal')) {
+      $('.modal').hide();
+    }
+  });
+
+  $('#add-row').click(function() {
+    const newRow = $(`
+      <tr>
+        <td><input type="text" class="product-search" placeholder="Search product..."></td>
+        <td><span class="mrp-display">0.00</span></td>
+        <td><input type="number" class="quantity-input" placeholder=""></td>
+        <td><span class="total-display">₹0.00</span></td>
+      </tr>
+    `);
+    $('#products-body').append(newRow);
+    initAutocompleteForRow(newRow);
+    attachEvents();
+  });
+
+  $('#clear-all').click(function() {
+    $('#products-body').empty();
+    const newRow = $(`
+      <tr>
+        <td><input type="text" class="product-search" placeholder="Search product..."></td>
+        <td><span class="mrp-display">0.00</span></td>
+        <td><input type="number" class="quantity-input" placeholder=""></td>
+        <td><span class="total-display">₹0.00</span></td>
+      </tr>
+    `);
+    $('#products-body').append(newRow);
+    initAutocompleteForRow(newRow);
+    attachEvents();
+    
+    $('#name').val("");
+    $('#discount-percent').val("");
+    $('#discount-flat').val("");
+    calculateTotal();
+  });
+
+  $('#discount-percent, #discount-flat').on('input', calculateTotal);
+
+  // ================= SCREENSHOT =================
+  $('#screenshot-btn').click(function() {
+    const name = $('#name').val() || "NoName";
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const dateStr = `${yyyy}${mm}${dd}`;
+    const fileName = `${name}_${dateStr}.png`;
+    
+    html2canvas(document.querySelector("#billing-container")).then(canvas => {
+      const link = document.createElement("a");
+      link.download = fileName;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+  });
+});
+</script>
 </body>
 </html>
