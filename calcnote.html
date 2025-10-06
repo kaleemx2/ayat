@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalcNote Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f0f0;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #4a6fa5;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .notepad-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: white;
+        }
+
+        .line {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .line-num {
+            width: 35px;
+            text-align: center;
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-right: 10px;
+        }
+
+        .line input {
+            flex: 1;
+            padding: 10px 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            margin: 0 8px;
+        }
+
+        .line-total {
+            width: 100px;
+            text-align: right;
+            padding: 10px 5px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+
+        .total-bar {
+            background: #ecf0f1;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 2px solid #bdc3c7;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .keyboard-toggle {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            padding: 12px;
+            background: #bdc3c7;
+            border-top: 1px solid #95a5a6;
+        }
+
+        .keypad button {
+            padding: 12px 5px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .keypad button:active {
+            background: #e0e0e0;
+            transform: scale(0.95);
+        }
+
+        .keypad .operator {
+            background: #3498db;
+            color: white;
+        }
+
+        .keypad .special {
+            background: #e67e22;
+            color: white;
+        }
+
+        .keypad .enter {
+            grid-column: span 2;
+            background: #27ae60;
+            color: white;
+        }
+
+        .comment {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+
+        .empty-output {
+            color: #95a5a6;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 10px;
+                background: #4a6fa5;
+            }
+            
+            .app-container {
+                max-width: 600px;
+                height: 95vh;
+                margin: 0 auto;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>CalcNote Pro</header>
+        
+        <div class="notepad-container" id="notepad">
+            <!-- Calculation lines will appear here -->
+        </div>
+        
+        <div class="total-bar">
+            <span>Final Total:</span>
+            <span id="finalTotal">₹ 0.0</span>
+            <button class="keyboard-toggle" id="keyboard-toggle">⌨️</button>
+        </div>
+        
+        <div class="keypad">
+            <button data-value="7">7</button>
+            <button data-value="8">8</button>
+            <button data-value="9">9</button>
+            <button data-value="+" class="operator">+</button>
+            <button data-value="(" class="special">(</button>
+            
+            <button data-value="4">4</button>
+            <button data-value="5">5</button>
+            <button data-value="6">6</button>
+            <button data-value="-" class="operator">-</button>
+            <button data-value=")" class="special">)</button>
+            
+            <button data-value="1">1</button>
+            <button data-value="2">2</button>
+            <button data-value="3">3</button>
+            <button data-value="*" class="operator">×</button>
+            <button data-value="," class="special">,</button>
+            
+            <button data-value="0">0</button>
+            <button data-value="00">00</button>
+            <button data-value=".">.</button>
+            <button data-value="/" class="operator">÷</button>
+            <button data-value="backspace" class="special">⌫</button>
+            
+            <button data-value="enter" class="enter">Enter</button>
+        </div>
+    </div>
+
+    <script>
+        const notepad = document.getElementById('notepad');
+        const finalTotalDisplay = document.getElementById('finalTotal');
+        const keyboardToggle = document.getElementById('keyboard-toggle');
+        
+        let lineCount = 0;
+        const lineResults = {};
+        let isSystemKeyboardMode = false;
+
+        // Initialize the app
+        function init() {
+            loadFromStorage();
+            if (lineCount === 0) {
+                addLine(true);
+            }
+            setupEventListeners();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Keypad buttons
+            document.querySelectorAll('.keypad button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const value = button.getAttribute('data-value');
+                    handleKeypadInput(value);
+                });
+            });
+            
+            // Keyboard toggle
+            keyboardToggle.addEventListener('click', toggleSystemKeyboard);
+        }
+
+        // Handle keypad input
+        function handleKeypadInput(value) {
+            if (isSystemKeyboardMode) return;
+            
+            let activeInput = document.querySelector('.line input:focus');
+            if (!activeInput) {
+                const inputs = document.querySelectorAll('.line input');
+                activeInput = inputs[inputs.length - 1];
+                if (activeInput) activeInput.focus();
+            }
+
+            if (!activeInput) return;
+
+            switch(value) {
+                case 'backspace':
+                    activeInput.value = activeInput.value.slice(0, -1);
+                    break;
+                case 'enter':
+                    addLine(true);
+                    break;
+                case '+':
+                case '-':
+                case '*':
+                case '/':
+                    activeInput.value += ` ${value} `;
+                    break;
+                default:
+                    activeInput.value += value;
+            }
+            
+            updateTotals();
+            saveToStorage();
+            
+            // Keep focus on current input
+            activeInput.focus();
+        }
+
+        // Toggle system keyboard
+        function toggleSystemKeyboard() {
+            isSystemKeyboardMode = !isSystemKeyboardMode;
+            
+            const inputs = document.querySelectorAll('.line input');
+            inputs.forEach(input => {
+                input.readOnly = !isSystemKeyboardMode;
+            });
+            
+            if (isSystemKeyboardMode) {
+                const lastInput = inputs[inputs.length - 1];
+                if (lastInput) lastInput.focus();
+                keyboardToggle.textContent = '📱';
+            } else {
+                keyboardToggle.textContent = '⌨️';
+            }
+            
+            saveToStorage();
+        }
+
+        // Add a new calculation line
+        function addLine(focus = false) {
+            lineCount++;
+            const line = document.createElement('div');
+            line.className = 'line';
+            line.innerHTML = `
+                <span class="line-num">${lineCount}</span>
+                <input type="text" data-line="${lineCount}" 
+                       placeholder="Enter calculation or :comment" 
+                       oninput="updateTotals()" />
+                <span class="line-total" id="total-${lineCount}">₹ 0.0</span>
+            `;
+            notepad.appendChild(line);
+            
+            if (focus) {
+                const input = line.querySelector('input');
+                setTimeout(() => {
+                    input.focus();
+                    if (!isSystemKeyboardMode) {
+                        input.readOnly = true;
+                    }
+                }, 10);
+            }
+            
+            updateTotals();
+            saveToStorage();
+            
+            // Scroll to bottom
+            notepad.scrollTop = notepad.scrollHeight;
+        }
+
+        // Format number display
+        function formatNumber(num) {
+            return '₹ ' + Number(num).toLocaleString('en-IN', {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            });
+        }
+
+        // Parse and evaluate expressions
+        function parseExpression(expr) {
+            // Handle comments - if there's a : or ; anywhere, treat the entire line as a comment
+            if (expr.includes(':') || expr.includes(';')) {
+                return 0;
+            }
+            
+            if (!expr || expr.trim() === '') return 0;
+
+            // Replace operators
+            expr = expr.replace(/×/g, '*').replace(/÷/g, '/');
+
+            // Replace ₹ references
+            expr = expr.replace(/₹([0-9]+)/g, (_, num) => {
+                return lineResults[num] || 0;
+            });
+
+            // Handle @rdown function
+            if (expr.includes('@rdown')) {
+                const match = expr.match(/@rdown\(([^,]+),\s*(\d+)\)/);
+                if (match) {
+                    const val = safeEval(match[1]);
+                    const decimals = parseInt(match[2]);
+                    return Math.floor(val * Math.pow(10, decimals)) / Math.pow(10, decimals);
+                }
+            }
+
+            // Handle sum function
+            if (expr.includes('sum')) {
+                const match = expr.match(/sum\(([^)]+)\)/);
+                if (match) {
+                    const refs = match[1].split(',').map(r => {
+                        const trimmed = r.trim();
+                        if (trimmed.startsWith('₹')) {
+                            const refNum = trimmed.substring(1);
+                            return lineResults[refNum] || 0;
+                        }
+                        return safeEval(trimmed);
+                    });
+                    return refs.reduce((acc, val) => acc + val, 0);
+                }
+            }
+
+            return safeEval(expr);
+        }
+
+        // Safe evaluation
+        function safeEval(expr) {
+            try {
+                // Clean the expression
+                expr = expr.replace(/[^0-9+\-*/().,\s]/g, '');
+                return new Function(`return ${expr}`)();
+            } catch {
+                return 0;
+            }
+        }
+
+        // Update all totals
+        function updateTotals() {
+            let finalTotal = 0;
+            
+            document.querySelectorAll('.line').forEach((line, index) => {
+                const lineNum = index + 1;
+                const input = line.querySelector('input');
+                const totalSpan = document.getElementById(`total-${lineNum}`);
+                
+                // Check if it's a comment (contains : or ; anywhere)
+                const isComment = input.value.includes(':') || input.value.includes(';');
+                
+                if (isComment) {
+                    lineResults[lineNum] = 0;
+                    totalSpan.textContent = '₹ 0.0';
+                    totalSpan.classList.add('empty-output');
+                    input.classList.add('comment');
+                } else {
+                    try {
+                        const result = parseExpression(input.value);
+                        lineResults[lineNum] = result;
+                        totalSpan.textContent = formatNumber(result);
+                        totalSpan.classList.remove('empty-output');
+                        input.classList.remove('comment');
+                        
+                        if (input.value.trim()) {
+                            finalTotal += result;
+                        }
+                    } catch {
+                        lineResults[lineNum] = 0;
+                        totalSpan.textContent = 'Error';
+                    }
+                }
+            });
+            
+            finalTotalDisplay.textContent = formatNumber(finalTotal);
+        }
+
+        // Save to localStorage
+        function saveToStorage() {
+            const lines = [];
+            document.querySelectorAll('.line input').forEach(input => {
+                lines.push(input.value);
+            });
+            localStorage.setItem('calcnote-pro-lines', JSON.stringify(lines));
+            localStorage.setItem('calcnote-pro-keyboard-mode', isSystemKeyboardMode);
+        }
+
+        // Load from localStorage
+        function loadFromStorage() {
+            const savedLines = localStorage.getItem('calcnote-pro-lines');
+            const savedKeyboardMode = localStorage.getItem('calcnote-pro-keyboard-mode');
+            
+            if (savedKeyboardMode) {
+                isSystemKeyboardMode = JSON.parse(savedKeyboardMode);
+                keyboardToggle.textContent = isSystemKeyboardMode ? '📱' : '⌨️';
+            }
+            
+            if (savedLines) {
+                const lines = JSON.parse(savedLines);
+                lines.forEach((line, index) => {
+                    if (index === 0) {
+                        addLine(false);
+                    } else {
+                        addLine(false);
+                    }
+                    const input = document.querySelector(`.line input[data-line="${index + 1}"]`);
+                    if (input) {
+                        input.value = line;
+                        if (!isSystemKeyboardMode) {
+                            input.readOnly = true;
+                        }
+                    }
+                });
+                updateTotals();
+            }
+        }
+
+        // Handle Enter key in inputs
+        function handleKey(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addLine(true);
+            }
+        }
+
+        // Add global event listener for Enter key
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' && e.key === 'Enter') {
+                e.preventDefault();
+                addLine(true);
+            }
+        });
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
