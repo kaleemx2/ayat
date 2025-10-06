@@ -64,15 +64,15 @@
         }
 
         .line input {
-    flex: 1;
-    padding: 10px 12px;
-    font-size: 25px;           /* Size badi karen */
-    font-weight: bold;         /* Text bold karen */
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: #fff;
-    margin: 0 8px;
-}
+            flex: 1;
+            padding: 10px 12px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            margin: 0 8px;
+        }
 
         .line-total {
             width: 100px;
@@ -194,7 +194,7 @@
             
             .line input {
                 padding: 8px 10px;
-                font-size: 15px;
+                font-size: 16px;
             }
             
             .total-bar {
@@ -368,6 +368,8 @@
 
         // Format number display with thousands separators
         function formatNumber(num) {
+            if (num === 0) return '';
+            
             // Handle negative numbers
             const isNegative = num < 0;
             const absNum = Math.abs(num);
@@ -450,10 +452,10 @@
                 const totalSpan = document.getElementById(`total-${lineNum}`);
                 const inputValue = input.value;
                 
-                // Check if line starts with colon (:) - FULL COMMENT
-                if (inputValue.trim().startsWith(':')) {
+                // Check if line contains colon (:) - LEFT-SIDE COMMENT (FULL LINE COMMENT)
+                if (inputValue.includes(':')) {
                     lineResults[lineNum] = 0;
-                    totalSpan.textContent = '₹ 0.0';
+                    totalSpan.textContent = '';  // Empty for colon comments
                     totalSpan.classList.add('empty-output');
                     input.classList.add('comment');
                 } 
