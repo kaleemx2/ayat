@@ -2,79 +2,148 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Smart Calc Table</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CalcNote Pro</title>
   <style>
-    body {
-      font-family: "Segoe UI", Roboto, sans-serif;
+    :root {
+      --primary-color: #0288D1;
+      --primary-dark: #0277BD;
+      --text-light: #fff;
+      --bg-light: #f4f6f8;
+      --card-bg: #fff;
+      --border-color: #e0e0e0;
+      --success-color: #4CAF50;
+      --danger-color: #d9534f;
+      --shadow: 0 2px 10px rgba(0,0,0,0.08);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
-      padding: 1px;
-      background: #f4f6f8;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--bg-light);
+      color: #333;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding: 10px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .container {
       max-width: 900px;
-      margin: auto;
-      background: #fff;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
-      border-radius: 8px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: var(--radius);
       overflow: hidden;
-      position: relative;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 20px);
     }
 
-    .storeHeader {
-      background: #0288D1;
-      color: white;
-      font-weight: bold;
-      font-size: 18px;
-      padding: 18px;
-      text-align: center;
-      border-bottom: 1px solid #ccc;
+    .header {
+      background: var(--primary-color);
+      color: var(--text-light);
+      padding: 16px 20px;
       position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    .storeHeader[contenteditable] {
+    .store-title {
+      font-weight: 600;
+      font-size: 20px;
+      flex: 1;
       outline: none;
-      font-size: 24px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background 0.2s;
     }
 
-    .menu {
-      position: absolute;
-      top: 10px;
-      right: 12px;
+    .store-title:focus {
+      background: rgba(255, 255, 255, 0.2);
     }
 
-    .menu button {
+    .menu-button {
       background: none;
       border: none;
-      font-size: 20px;
+      color: var(--text-light);
+      font-size: 24px;
       cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .menu-button:active {
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .dropdown {
       display: none;
       position: absolute;
-      right: 0;
-      top: 30px;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      z-index: 10;
+      right: 15px;
+      top: 60px;
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 100;
+      width: 180px;
+      overflow: hidden;
+    }
+
+    .dropdown.show {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .dropdown button {
-      display: block;
+      display: flex;
+      align-items: center;
       width: 100%;
-      padding: 8px 12px;
+      padding: 12px 16px;
       background: none;
       border: none;
       text-align: left;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 16px;
+      transition: background 0.2s;
     }
 
-    .dropdown button:hover {
-      background: #f0f0f0;
+    .dropdown button:active {
+      background: #f5f5f5;
+    }
+
+    .dropdown button i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+
+    .table-container {
+      flex: 1;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     table {
@@ -83,84 +152,166 @@
     }
 
     thead {
-      background: #e9ecef;
+      background: #f8f9fa;
       position: sticky;
       top: 0;
-      z-index: 1;
+      z-index: 10;
     }
 
     th, td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border-color);
       text-align: left;
     }
 
-    td[contenteditable] {
-      font-size: 18px;
-      font-weight: bold;
-      background-color: transparent;
-      transition: background 0.3s;
+    th {
+      font-weight: 600;
+      font-size: 14px;
+      color: #555;
     }
 
-    td[contenteditable]:focus {
-      background-color: #fff8cc;
-      outline: none;
-    }
-
-    td:nth-child(3)[contenteditable] {
-      color: #999;
-    }
-
-    td:nth-child(4) {
-      font-size: 18px;
-      font-weight: bold;
-      background-color: #fffbe6;
-    }
-
-    .indexCol {
-      width: 18px;
+    .index-col {
+      width: 50px;
       text-align: center;
-      font-weight: bold;
-      background: #f1f3f5;
-      color: #A00000;
+      font-weight: 600;
+      background: #f8f9fa;
+      color: var(--primary-color);
+    }
+
+    .entry-cell {
+      font-weight: 600;
+      font-size: 16px;
+      background-color: transparent;
+      transition: background 0.2s;
+      outline: none;
+      min-width: 120px;
+    }
+
+    .entry-cell:focus {
+      background-color: #fff8e1;
+    }
+
+    .description-cell {
+      color: #666;
+      font-size: 14px;
+      background-color: transparent;
+      transition: background 0.2s;
+      outline: none;
+      min-width: 150px;
+    }
+
+    .description-cell:focus {
+      background-color: #f5f5f5;
+    }
+
+    .value-cell {
+      font-weight: 600;
+      font-size: 16px;
+      background-color: #fff8e1;
+      min-width: 100px;
+      text-align: right;
     }
 
     .negative {
-      color: #d9534f;
-      font-weight: bold;
+      color: var(--danger-color);
     }
 
-    tfoot td {
-      font-size: 20px;
-      font-weight: bold;
-      background: #E0E0E0 !important;
-      color: #0288D1;
-    /*  border-top: 0px solid #ccc; */
+    .footer {
+      background: #f5f5f5;
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    #totalCell {
-      font-size: 22px;
-      font-weight: bold;
-      background-color: #e0f7fa;
+    .total-label {
+      font-weight: 600;
+      font-size: 16px;
+      color: #555;
     }
 
-    @media (max-width: 600px) {
-      th, td {
-        font-size: 14px;
-        padding: 8px;
+    .total-value {
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--primary-color);
+    }
+
+    /* Mobile-specific styles */
+    @media (max-width: 768px) {
+      body {
+        padding: 0;
       }
-
-      .storeHeader {
-        font-size: 16px;
-        padding: 10px;
+      
+      .container {
+        height: 100vh;
+        border-radius: 0;
       }
-
-      tfoot td {
+      
+      .header {
+        padding: 16px;
+      }
+      
+      .store-title {
         font-size: 18px;
       }
+      
+      th, td {
+        padding: 12px 10px;
+        font-size: 14px;
+      }
+      
+      .entry-cell {
+        font-size: 15px;
+      }
+      
+      .value-cell {
+        font-size: 15px;
+      }
+      
+      .footer {
+        padding: 14px 16px;
+      }
+      
+      .total-value {
+        font-size: 17px;
+      }
+    }
 
-      #totalCell {
-        font-size: 20px;
+    @media (max-width: 480px) {
+      .header {
+        padding: 14px 16px;
+      }
+      
+      th, td {
+        padding: 10px 8px;
+      }
+      
+      .index-col {
+        width: 40px;
+      }
+      
+      .entry-cell, .value-cell {
+        font-size: 14px;
+      }
+      
+      .description-cell {
+        font-size: 13px;
+      }
+      
+      .footer {
+        padding: 12px 16px;
+      }
+      
+      .total-value {
+        font-size: 16px;
+      }
+    }
+
+    /* iOS Safari specific fixes */
+    @supports (-webkit-touch-callout: none) {
+      body {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
       }
     }
   </style>
@@ -168,67 +319,78 @@
 <body>
 
 <div class="container">
-  <div contenteditable="true" class="storeHeader">
-    Store
-    <div class="menu">
-      <button id="menuBtn">⋮</button>
-      <div class="dropdown" id="dropdownMenu">
-        <button id="saveBtn">💾 Save Data</button>
-      </div>
+  <div class="header">
+    <div class="store-title" contenteditable="true">My Store</div>
+    <button class="menu-button" id="menuBtn">⋮</button>
+    <div class="dropdown" id="dropdownMenu">
+      <button id="saveBtn"><i>💾</i> Save Data</button>
+      <button id="clearBtn"><i>🗑️</i> Clear All</button>
+      <button id="exportBtn"><i>📤</i> Export</button>
     </div>
   </div>
 
-  <table id="calcTable">
-    <thead>
-      <tr>
-        <th class="indexCol">#</th>
-        <th>Entry</th>
-        <th>Description</th>
-        <th>Value</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="indexCol">1</td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td></td>
-      </tr>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="3">Total</td>
-        <td id="totalCell"></td>
-      </tr>
-    </tfoot>
-  </table>
+  <div class="table-container">
+    <table id="calcTable">
+      <thead>
+        <tr>
+          <th class="index-col">#</th>
+          <th>Entry</th>
+          <th>Description</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="index-col">1</td>
+          <td class="entry-cell" contenteditable="true"></td>
+          <td class="description-cell" contenteditable="true"></td>
+          <td class="value-cell"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <div class="total-label">Total</div>
+    <div class="total-value" id="totalCell">0</div>
+  </div>
 </div>
 
 <script>
+  // Initialize the app
+  document.addEventListener('DOMContentLoaded', function() {
+    calculateTable();
+    setupEventListeners();
+  });
+
   function calculateTable() {
     const rows = document.querySelectorAll("#calcTable tbody tr");
     let total = 0;
 
     rows.forEach((row, index) => {
-      row.cells[0].textContent = index + 1;
-      const entryCell = row.cells[1];
-      const valueCell = row.cells[3];
+      row.querySelector('.index-col').textContent = index + 1;
+      const entryCell = row.querySelector('.entry-cell');
+      const valueCell = row.querySelector('.value-cell');
       let input = entryCell.textContent.trim();
 
       try {
-        let result = Function('"use strict";return (' + input.replace(/[^-()\d/*+.]/g, '') + ')')();
+        // Sanitize and evaluate the expression
+        let sanitizedInput = input.replace(/[^-()\d/*+.]/g, '');
+        let result = Function('"use strict";return (' + sanitizedInput + ')')();
+        
         if (isNaN(result)) result = 0;
         valueCell.textContent = result.toLocaleString();
-        valueCell.className = result < 0 ? 'negative' : '';
+        valueCell.className = result < 0 ? 'value-cell negative' : 'value-cell';
         total += result;
       } catch {
         valueCell.textContent = '';
-        valueCell.className = '';
+        valueCell.className = 'value-cell';
       }
     });
 
-    document.getElementById("totalCell").textContent = total.toLocaleString();
-    document.getElementById("totalCell").className = total < 0 ? 'negative' : '';
+    const totalCell = document.getElementById("totalCell");
+    totalCell.textContent = total.toLocaleString();
+    totalCell.className = total < 0 ? 'total-value negative' : 'total-value';
   }
 
   function addRow() {
@@ -236,40 +398,68 @@
     const newRow = document.createElement("tr");
 
     newRow.innerHTML = `
-      <td class="indexCol"></td>
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td></td>
+      <td class="index-col"></td>
+      <td class="entry-cell" contenteditable="true"></td>
+      <td class="description-cell" contenteditable="true"></td>
+      <td class="value-cell"></td>
     `;
 
     tbody.appendChild(newRow);
-    newRow.querySelectorAll("td[contenteditable]").forEach(cell => {
-      cell.addEventListener("input", calculateTable);
-      cell.addEventListener("keydown", handleKeyEvents);
+    
+    // Add event listeners to the new row
+    const editableCells = newRow.querySelectorAll('[contenteditable]');
+    editableCells.forEach(cell => {
+      cell.addEventListener('input', calculateTable);
+      cell.addEventListener('keydown', handleKeyEvents);
     });
 
     calculateTable();
+    
+    // Focus on the first editable cell in the new row
+    newRow.querySelector('.entry-cell').focus();
   }
 
   function handleKeyEvents(e) {
+    const row = e.target.closest('tr');
+    const isLastRow = row === document.querySelector("#calcTable tbody tr:last-child");
+    
     if (e.key === "Enter") {
       e.preventDefault();
-      addRow();
-      const lastRow = document.querySelector("#calcTable tbody tr:last-child");
-      lastRow.cells[1].focus();
+      
+      // If we're in the last row, add a new row
+      if (isLastRow) {
+        addRow();
+      } else {
+        // Move to next row
+        const nextRow = row.nextElementSibling;
+        const cellIndex = Array.from(row.cells).indexOf(e.target);
+        if (nextRow) {
+          nextRow.cells[cellIndex].focus();
+        }
+      }
     }
 
-    if (e.key === "Backspace") {
+    if (e.key === "Backspace" || e.key === "Delete") {
       const cell = e.target;
-      const row = cell.parentElement;
-      const isEmpty = [...row.querySelectorAll("td[contenteditable]")]
-        .every(c => c.textContent.trim() === "");
-
-      const tbody = document.querySelector("#calcTable tbody");
-      if (isEmpty && tbody.rows.length > 1) {
-        e.preventDefault();
-        row.remove();
-        calculateTable();
+      const isEmpty = cell.textContent.trim() === '';
+      
+      // If the cell is empty and we're not in the first row, remove the row
+      if (isEmpty && row.rowIndex > 1) {
+        setTimeout(() => {
+          const allEmpty = Array.from(row.querySelectorAll('[contenteditable]'))
+            .every(c => c.textContent.trim() === '');
+          
+          if (allEmpty) {
+            row.remove();
+            calculateTable();
+            
+            // Focus on the previous row
+            const prevRow = document.querySelector("#calcTable tbody tr:last-child");
+            if (prevRow) {
+              prevRow.querySelector('.entry-cell').focus();
+            }
+          }
+        }, 0);
       }
     }
   }
@@ -277,37 +467,187 @@
   function saveData() {
     const rows = document.querySelectorAll("#calcTable tbody tr");
     const data = [];
+    const storeName = document.querySelector('.store-title').textContent;
 
     rows.forEach(row => {
-      const entry = row.cells[1].textContent.trim();
-      const desc = row.cells[2].textContent.trim();
-      const value = row.cells[3].textContent.trim();
-      data.push({ entry, desc, value });
+      const entry = row.querySelector('.entry-cell').textContent.trim();
+      const desc = row.querySelector('.description-cell').textContent.trim();
+      const value = row.querySelector('.value-cell').textContent.trim();
+      if (entry || desc) {
+        data.push({ entry, desc, value });
+      }
     });
 
-    console.log("Saved Data:", data);
-    alert("Data saved! (Check console for now)");
+    const saveObject = {
+      storeName,
+      data,
+      total: document.getElementById("totalCell").textContent,
+      timestamp: new Date().toISOString()
+    };
+
+    localStorage.setItem('smartCalcData', JSON.stringify(saveObject));
+    
+    // Show a confirmation
+    showToast('Data saved successfully!');
   }
 
-  document.getElementById("saveBtn").addEventListener("click", saveData);
-
-  document.getElementById("menuBtn").addEventListener("click", () => {
-    const menu = document.getElementById("dropdownMenu");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".menu")) {
-      document.getElementById("dropdownMenu").style.display = "none";
+  function loadData() {
+    const savedData = localStorage.getItem('smartCalcData');
+    if (savedData) {
+      const data = JSON.parse(savedData);
+      
+      // Set store name
+      document.querySelector('.store-title').textContent = data.storeName || 'My Store';
+      
+      // Clear existing rows (except the first one)
+      const tbody = document.querySelector("#calcTable tbody");
+      tbody.innerHTML = '';
+      
+      // Add saved rows
+      if (data.data && data.data.length > 0) {
+        data.data.forEach(item => {
+          const newRow = document.createElement("tr");
+          newRow.innerHTML = `
+            <td class="index-col"></td>
+            <td class="entry-cell" contenteditable="true">${item.entry || ''}</td>
+            <td class="description-cell" contenteditable="true">${item.desc || ''}</td>
+            <td class="value-cell">${item.value || ''}</td>
+          `;
+          tbody.appendChild(newRow);
+        });
+      } else {
+        // Add one empty row if no data
+        addRow();
+      }
+      
+      // Reattach event listeners
+      document.querySelectorAll("#calcTable td[contenteditable]").forEach(cell => {
+        cell.addEventListener("input", calculateTable);
+        cell.addEventListener("keydown", handleKeyEvents);
+      });
+      
+      calculateTable();
+      showToast('Data loaded successfully!');
+    } else {
+      showToast('No saved data found');
     }
-  });
+  }
 
-  document.querySelectorAll("#calcTable td[contenteditable]").forEach(cell => {
-    cell.addEventListener("input", calculateTable);
-    cell.addEventListener("keydown", handleKeyEvents);
-  });
+  function clearAll() {
+    if (confirm('Are you sure you want to clear all data?')) {
+      const tbody = document.querySelector("#calcTable tbody");
+      tbody.innerHTML = '';
+      addRow();
+      document.querySelector('.store-title').textContent = 'My Store';
+      showToast('All data cleared');
+    }
+  }
 
-  calculateTable();
+  function exportData() {
+    const rows = document.querySelectorAll("#calcTable tbody tr");
+    let csvContent = "Entry,Description,Value\n";
+    
+    rows.forEach(row => {
+      const entry = row.querySelector('.entry-cell').textContent.trim();
+      const desc = row.querySelector('.description-cell').textContent.trim();
+      const value = row.querySelector('.value-cell').textContent.trim();
+      
+      if (entry || desc) {
+        csvContent += `"${entry}","${desc}","${value}"\n`;
+      }
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'calculator_data.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('Data exported as CSV');
+  }
+
+  function showToast(message) {
+    // Remove existing toast if any
+    const existingToast = document.querySelector('.toast');
+    if (existingToast) {
+      existingToast.remove();
+    }
+    
+    // Create new toast
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      z-index: 1000;
+      animation: fadeInOut 2.5s ease-in-out;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Remove toast after animation
+    setTimeout(() => {
+      toast.remove();
+    }, 2500);
+  }
+
+  function setupEventListeners() {
+    // Menu button
+    document.getElementById("menuBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      const menu = document.getElementById("dropdownMenu");
+      menu.classList.toggle("show");
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", () => {
+      document.getElementById("dropdownMenu").classList.remove("show");
+    });
+
+    // Menu actions
+    document.getElementById("saveBtn").addEventListener("click", saveData);
+    document.getElementById("clearBtn").addEventListener("click", clearAll);
+    document.getElementById("exportBtn").addEventListener("click", exportData);
+
+    // Initial event listeners for editable cells
+    document.querySelectorAll("#calcTable td[contenteditable]").forEach(cell => {
+      cell.addEventListener("input", calculateTable);
+      cell.addEventListener("keydown", handleKeyEvents);
+    });
+
+    // Store title editing
+    document.querySelector('.store-title').addEventListener('input', () => {
+      // Auto-save when store name changes
+      saveData();
+    });
+
+    // Load saved data on startup
+    loadData();
+  }
+
+  // Add CSS for toast animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    }
+  `;
+  document.head.appendChild(style);
 </script>
 
 </body>
