@@ -1876,7 +1876,7 @@
                 transaction.type === 'cash_in' ? formatNumber(transaction.amount) : '-',
                 transaction.type === 'cash_out' ? formatNumber(transaction.amount) : '-',
                 formatNumber(runningBalance),
-                (transaction.comment ? transaction.comment.replace(/[^\w\s.,-]/g, '').substring(0, 50) : ''),
+                transaction.comment || '-',
                 billLinksDisplay
             ];
         });
