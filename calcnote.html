@@ -16,6 +16,16 @@
       --danger-color: #d9534f;
       --shadow: 0 2px 10px rgba(0,0,0,0.08);
       --radius: 12px;
+      
+      /* Customizable styles for different sections */
+      --entry-font-size: 16px;
+      --entry-bg-color: transparent;
+      --description-font-size: 14px;
+      --description-bg-color: transparent;
+      --value-font-size: 16px;
+      --value-bg-color: #fff8e1;
+      --total-font-size: 18px;
+      --total-bg-color: #f5f5f5;
     }
 
     * {
@@ -140,6 +150,28 @@
       font-size: 18px;
     }
 
+    /* Total display at the top */
+    .total-display {
+      background: var(--total-bg-color);
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .total-label {
+      font-weight: 600;
+      font-size: var(--total-font-size);
+      color: #555;
+    }
+
+    .total-value {
+      font-weight: 700;
+      font-size: var(--total-font-size);
+      color: var(--primary-color);
+    }
+
     .table-container {
       flex: 1;
       overflow: auto;
@@ -180,8 +212,8 @@
 
     .entry-cell {
       font-weight: 600;
-      font-size: 16px;
-      background-color: transparent;
+      font-size: var(--entry-font-size);
+      background-color: var(--entry-bg-color);
       transition: background 0.2s;
       outline: none;
       min-width: 120px;
@@ -193,8 +225,8 @@
 
     .description-cell {
       color: #666;
-      font-size: 14px;
-      background-color: transparent;
+      font-size: var(--description-font-size);
+      background-color: var(--description-bg-color);
       transition: background 0.2s;
       outline: none;
       min-width: 150px;
@@ -206,8 +238,8 @@
 
     .value-cell {
       font-weight: 600;
-      font-size: 16px;
-      background-color: #fff8e1;
+      font-size: var(--value-font-size);
+      background-color: var(--value-bg-color);
       min-width: 100px;
       text-align: right;
     }
@@ -218,23 +250,93 @@
 
     .footer {
       background: #f5f5f5;
-      padding: 16px 20px;
+      padding: 12px 20px;
       border-top: 1px solid var(--border-color);
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
     }
 
-    .total-label {
+    .add-row-btn {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
       font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .add-row-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Style customization panel */
+    .style-panel {
+      position: fixed;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      padding: 16px;
+      width: 250px;
+      z-index: 1000;
+      display: none;
+    }
+
+    .style-panel.show {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .style-panel h3 {
+      margin-bottom: 16px;
       font-size: 16px;
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
+    }
+
+    .style-group {
+      margin-bottom: 16px;
+    }
+
+    .style-group label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
       color: #555;
     }
 
-    .total-value {
-      font-weight: 700;
-      font-size: 18px;
-      color: var(--primary-color);
+    .style-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .style-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary-color);
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 999;
     }
 
     /* Mobile-specific styles */
@@ -262,19 +364,25 @@
       }
       
       .entry-cell {
-        font-size: 15px;
+        font-size: calc(var(--entry-font-size) - 1px);
       }
       
       .value-cell {
-        font-size: 15px;
+        font-size: calc(var(--value-font-size) - 1px);
       }
       
-      .footer {
+      .total-display {
         padding: 14px 16px;
       }
       
       .total-value {
-        font-size: 17px;
+        font-size: calc(var(--total-font-size) - 1px);
+      }
+      
+      .style-panel {
+        width: 90%;
+        right: 5%;
+        left: 5%;
       }
     }
 
@@ -292,19 +400,19 @@
       }
       
       .entry-cell, .value-cell {
-        font-size: 14px;
+        font-size: calc(var(--entry-font-size) - 2px);
       }
       
       .description-cell {
-        font-size: 13px;
+        font-size: calc(var(--description-font-size) - 1px);
       }
       
-      .footer {
+      .total-display {
         padding: 12px 16px;
       }
       
       .total-value {
-        font-size: 16px;
+        font-size: calc(var(--total-font-size) - 2px);
       }
     }
 
@@ -326,7 +434,14 @@
       <button id="saveBtn"><i>💾</i> Save Data</button>
       <button id="clearBtn"><i>🗑️</i> Clear All</button>
       <button id="exportBtn"><i>📤</i> Export</button>
+      <button id="styleBtn"><i>🎨</i> Customize Styles</button>
     </div>
+  </div>
+
+  <!-- Total display moved to top -->
+  <div class="total-display">
+    <div class="total-label">Total</div>
+    <div class="total-value" id="totalCell">0</div>
   </div>
 
   <div class="table-container">
@@ -350,17 +465,71 @@
     </table>
   </div>
 
+  <!-- Footer with add row button -->
   <div class="footer">
-    <div class="total-label">Total</div>
-    <div class="total-value" id="totalCell">0</div>
+    <button class="add-row-btn" id="addRowBtn">
+      <span>+</span> Add Row
+    </button>
   </div>
 </div>
+
+<!-- Style customization panel -->
+<div class="style-panel" id="stylePanel">
+  <h3>Customize Styles</h3>
+  
+  <div class="style-group">
+    <label for="entryFontSize">Entry Font Size (px)</label>
+    <input type="number" id="entryFontSize" min="10" max="30" value="16">
+  </div>
+  
+  <div class="style-group">
+    <label for="entryBgColor">Entry Background Color</label>
+    <input type="color" id="entryBgColor" value="#ffffff">
+  </div>
+  
+  <div class="style-group">
+    <label for="descriptionFontSize">Description Font Size (px)</label>
+    <input type="number" id="descriptionFontSize" min="10" max="30" value="14">
+  </div>
+  
+  <div class="style-group">
+    <label for="descriptionBgColor">Description Background Color</label>
+    <input type="color" id="descriptionBgColor" value="#ffffff">
+  </div>
+  
+  <div class="style-group">
+    <label for="valueFontSize">Value Font Size (px)</label>
+    <input type="number" id="valueFontSize" min="10" max="30" value="16">
+  </div>
+  
+  <div class="style-group">
+    <label for="valueBgColor">Value Background Color</label>
+    <input type="color" id="valueBgColor" value="#fff8e1">
+  </div>
+  
+  <div class="style-group">
+    <label for="totalFontSize">Total Font Size (px)</label>
+    <input type="number" id="totalFontSize" min="10" max="30" value="18">
+  </div>
+  
+  <div class="style-group">
+    <label for="totalBgColor">Total Background Color</label>
+    <input type="color" id="totalBgColor" value="#f5f5f5">
+  </div>
+  
+  <button class="add-row-btn" id="applyStyles" style="width: 100%; margin-top: 10px;">
+    Apply Styles
+  </button>
+</div>
+
+<div class="style-toggle" id="styleToggle">🎨</div>
 
 <script>
   // Initialize the app
   document.addEventListener('DOMContentLoaded', function() {
     calculateTable();
     setupEventListeners();
+    loadStyles();
   });
 
   function calculateTable() {
@@ -570,6 +739,61 @@
     showToast('Data exported as CSV');
   }
 
+  function applyCustomStyles() {
+    const entryFontSize = document.getElementById('entryFontSize').value;
+    const entryBgColor = document.getElementById('entryBgColor').value;
+    const descriptionFontSize = document.getElementById('descriptionFontSize').value;
+    const descriptionBgColor = document.getElementById('descriptionBgColor').value;
+    const valueFontSize = document.getElementById('valueFontSize').value;
+    const valueBgColor = document.getElementById('valueBgColor').value;
+    const totalFontSize = document.getElementById('totalFontSize').value;
+    const totalBgColor = document.getElementById('totalBgColor').value;
+    
+    // Update CSS variables
+    document.documentElement.style.setProperty('--entry-font-size', `${entryFontSize}px`);
+    document.documentElement.style.setProperty('--entry-bg-color', entryBgColor);
+    document.documentElement.style.setProperty('--description-font-size', `${descriptionFontSize}px`);
+    document.documentElement.style.setProperty('--description-bg-color', descriptionBgColor);
+    document.documentElement.style.setProperty('--value-font-size', `${valueFontSize}px`);
+    document.documentElement.style.setProperty('--value-bg-color', valueBgColor);
+    document.documentElement.style.setProperty('--total-font-size', `${totalFontSize}px`);
+    document.documentElement.style.setProperty('--total-bg-color', totalBgColor);
+    
+    // Save styles
+    const styles = {
+      entryFontSize,
+      entryBgColor,
+      descriptionFontSize,
+      descriptionBgColor,
+      valueFontSize,
+      valueBgColor,
+      totalFontSize,
+      totalBgColor
+    };
+    
+    localStorage.setItem('calcStyles', JSON.stringify(styles));
+    showToast('Styles applied successfully!');
+  }
+
+  function loadStyles() {
+    const savedStyles = localStorage.getItem('calcStyles');
+    if (savedStyles) {
+      const styles = JSON.parse(savedStyles);
+      
+      document.getElementById('entryFontSize').value = styles.entryFontSize;
+      document.getElementById('entryBgColor').value = styles.entryBgColor;
+      document.getElementById('descriptionFontSize').value = styles.descriptionFontSize;
+      document.getElementById('descriptionBgColor').value = styles.descriptionBgColor;
+      document.getElementById('valueFontSize').value = styles.valueFontSize;
+      document.getElementById('valueBgColor').value = styles.valueBgColor;
+      document.getElementById('totalFontSize').value = styles.totalFontSize;
+      document.getElementById('totalBgColor').value = styles.totalBgColor;
+      
+      // Apply the styles
+      applyCustomStyles();
+    }
+  }
+
   function showToast(message) {
     // Remove existing toast if any
     const existingToast = document.querySelector('.toast');
@@ -614,12 +838,27 @@
     // Close dropdown when clicking outside
     document.addEventListener("click", () => {
       document.getElementById("dropdownMenu").classList.remove("show");
+      document.getElementById("stylePanel").classList.remove("show");
     });
 
     // Menu actions
     document.getElementById("saveBtn").addEventListener("click", saveData);
     document.getElementById("clearBtn").addEventListener("click", clearAll);
     document.getElementById("exportBtn").addEventListener("click", exportData);
+    document.getElementById("styleBtn").addEventListener("click", () => {
+      document.getElementById("stylePanel").classList.toggle("show");
+      document.getElementById("dropdownMenu").classList.remove("show");
+    });
+
+    // Add row button
+    document.getElementById("addRowBtn").addEventListener("click", addRow);
+
+    // Style panel
+    document.getElementById("styleToggle").addEventListener("click", () => {
+      document.getElementById("stylePanel").classList.toggle("show");
+    });
+
+    document.getElementById("applyStyles").addEventListener("click", applyCustomStyles);
 
     // Initial event listeners for editable cells
     document.querySelectorAll("#calcTable td[contenteditable]").forEach(cell => {
