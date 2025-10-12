@@ -382,9 +382,50 @@ body { background: #e0e5ec; padding: 10px; }
   margin-top: 10px;
 }
 
+/* ==== DROPDOWN PRODUCTS STYLE ===== */
 .backup-buttons .btn {
   flex: 1;
   justify-content: center;
+}
+  /* ================= AUTCOMPLETE DROPDOWN STYLING ================= */
+.ui-autocomplete {
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.ui-menu .ui-menu-item {
+    padding: 10px 10px;
+    border-bottom: 2px solid #ddd;
+    font-size: 18px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.ui-menu .ui-menu-item:last-child {
+    border-bottom: none;
+}
+
+.ui-menu .ui-menu-item:hover {
+    background: #e3f2fd;
+    color: #1976d2;
+    border-left: 3px solid #1976d2;
+}
+
+.ui-menu .ui-state-active, 
+.ui-menu .ui-state-focus {
+    background: #1976d2 !important;
+    color: white !important;
+    border: none !important;
+    margin: 0 !important;
+}
+
+.ui-autocomplete .ui-menu-item-wrapper {
+    padding: 8px 12px !important;
 }
 
 /* New History Management Styles */
