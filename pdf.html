@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixed Text Editor with Working Formatting</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-html.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <title>CodePad++ - Professional Code Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --editor-bg: #1a1a1a;
+            --editor-text: #e0e0e0;
+            --line-numbers: #6a9955;
+            --preview-bg: #ffffff;
+            --preview-text: #333333;
+            --header-height: 60px;
+            --preview-height: 40vh;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -19,427 +26,1027 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            color: #333;
-            min-height: 100vh;
-            padding: 15px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            background-color: #0d1117;
+            color: var(--editor-text);
+            height: 100vh;
+            overflow: hidden;
         }
 
         header {
-            text-align: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        h1 {
+            background-color: var(--primary-color);
             color: white;
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            height: var(--header-height);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 100;
         }
 
-        .subtitle {
-            color: #e0e0e0;
-            font-size: 1rem;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .logo i {
+            color: var(--secondary-color);
+        }
+
+        .menu {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: background 0.3s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .menu-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .header-icon {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background 0.3s;
+            font-size: 16px;
+        }
+
+        .header-icon:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            border-radius: 4px;
+            overflow: hidden;
+            top: 100%;
+            left: 0;
+        }
+
+        .dropdown-content a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 14px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            padding: 5px 10px;
+            margin-right: 10px;
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 5px;
+            width: 200px;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - var(--header-height));
+            overflow: hidden;
         }
 
         .editor-container {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-            height: 70vh;
+            background-color: var(--editor-bg);
+            position: relative;
+            min-height: 0;
         }
 
-        .toolbar {
+        .editor-header {
+            padding: 10px 15px;
+            background-color: #252526;
+            border-bottom: 1px solid #3c3c3c;
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 12px;
-            background: #2c3e50;
-            border-bottom: 1px solid #34495e;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
         }
 
-        .toolbar-group {
+        .editor-title {
+            font-size: 14px;
+            color: #cccccc;
+        }
+
+        .editor-controls {
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
+            gap: 10px;
         }
 
-        .toolbar button, .toolbar select {
-            padding: 8px 12px;
+        .editor-controls button {
+            background: none;
             border: none;
-            border-radius: 5px;
-            color: white;
+            color: #cccccc;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 3px;
+            transition: background 0.2s;
         }
 
-        .toolbar button:hover {
-            transform: translateY(-2px);
+        .editor-controls button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
-        .format-btn {
-            background: #16a085;
-        }
-
-        .format-btn:hover {
-            background: #1abc9c;
-        }
-
-        .download-btn {
-            background: #e74c3c;
-        }
-
-        .download-btn:hover {
-            background: #c0392b;
-        }
-
-        .toggle-btn {
-            background: #9b59b6;
-        }
-
-        .toggle-btn:hover {
-            background: #8e44ad;
-        }
-
-        .toolbar select {
-            background: #3498db;
-        }
-
-        .toolbar select:hover {
-            background: #2980b9;
-        }
-
-        .editor-area {
-            display: flex;
+        .editor-wrapper {
             flex: 1;
+            display: flex;
             overflow: hidden;
+            min-height: 0;
         }
 
         .line-numbers {
-            width: 50px;
-            background: #f0f0f0;
-            padding: 12px 8px;
+            background-color: #1e1e1e;
+            color: var(--line-numbers);
+            padding: 10px 5px;
             text-align: right;
             font-family: 'Courier New', monospace;
-            color: #555;
-            overflow-y: auto;
-            border-right: 1px solid #ddd;
-            line-height: 1.5;
             font-size: 14px;
+            line-height: 20px;
+            user-select: none;
+            overflow: hidden;
+            border-right: 1px solid #3c3c3c;
+            width: 50px;
+            min-width: 50px;
+            flex-shrink: 0;
         }
 
-        #editor {
+        .code-area {
             flex: 1;
-            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            min-height: 0;
+        }
+
+        #code-editor {
+            flex: 1;
+            background-color: var(--editor-bg);
+            color: var(--editor-text);
             border: none;
-            outline: none;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 20px;
             resize: none;
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            line-height: 1.5;
-            overflow-y: auto;
-            background: #fdfdfd;
-            color: #222;
-        }
-
-        .code-highlight {
-            flex: 1;
-            padding: 12px;
-            overflow-y: auto;
-            background: #272822;
-            color: #f8f8f2;
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            line-height: 1.5;
+            outline: none;
+            overflow: auto;
+            tab-size: 4;
             white-space: pre;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
         }
 
-        .hidden {
-            display: none;
+        .preview-container {
+            height: var(--preview-height);
+            background-color: var(--preview-bg);
+            border-top: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            transition: height 0.3s ease;
+            min-height: 0;
         }
 
-        footer {
-            text-align: center;
-            padding: 15px;
+        .preview-container.hidden {
+            height: 0;
+            border-top: none;
+        }
+
+        .preview-header {
+            padding: 10px 15px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #333;
+            flex-shrink: 0;
+        }
+
+        .preview-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .preview-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .preview-controls button {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 3px;
+            transition: background 0.2s;
+        }
+
+        .preview-controls button:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        #preview-frame {
+            flex: 1;
+            border: none;
+            background-color: white;
+            width: 100%;
+            min-height: 0;
+        }
+
+        /* Syntax Highlighting Colors */
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; }
+        .function { color: #dcdcaa; }
+        .number { color: #b5cea8; }
+        .operator { color: #d4d4d4; }
+        .variable { color: #9cdcfe; }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #2c3e50;
             color: white;
-            font-size: 0.8rem;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.3s;
         }
 
-        /* Mobile-specific adjustments */
+        .toast.success {
+            background-color: #27ae60;
+        }
+
+        .toast.error {
+            background-color: #e74c3c;
+        }
+
+        /* Fullscreen Preview */
+        .fullscreen-preview {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .fullscreen-preview.active {
+            display: flex;
+        }
+
+        .fullscreen-header {
+            padding: 15px 20px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #333;
+        }
+
+        .fullscreen-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .fullscreen-controls button {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .fullscreen-controls button:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        #fullscreen-preview-frame {
+            flex: 1;
+            border: none;
+            background-color: white;
+            width: 100%;
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
+            .preview-container {
+                height: 30vh;
             }
             
-            h1 {
-                font-size: 1.5rem;
+            .menu {
+                gap: 10px;
             }
             
-            .subtitle {
-                font-size: 0.9rem;
-            }
-            
-            .toolbar {
-                padding: 10px;
-                gap: 6px;
-            }
-            
-            .toolbar-group {
-                gap: 6px;
-            }
-            
-            .toolbar button, .toolbar select {
+            .menu-btn {
                 padding: 6px 10px;
-                font-size: 0.85rem;
+                font-size: 12px;
             }
             
-            .line-numbers {
-                width: 40px;
-                padding: 10px 5px;
-                font-size: 13px;
+            .menu-btn span {
+                display: none;
             }
             
-            #editor, .code-highlight {
-                padding: 10px;
-                font-size: 15px;
-            }
-            
-            .editor-container {
-                height: 65vh;
+            .search-input {
+                width: 150px;
             }
         }
 
         @media (max-width: 480px) {
-            .toolbar {
-                flex-direction: column;
-                align-items: center;
+            .logo span {
+                display: none;
             }
             
-            .toolbar-group {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .toolbar button, .toolbar select {
-                flex: 1;
-                min-width: 0;
-                text-align: center;
+            .dropdown-content {
+                min-width: 150px;
             }
             
             .line-numbers {
-                width: 35px;
-                padding: 8px 4px;
-                font-size: 12px;
+                width: 40px;
+                min-width: 40px;
+                padding: 10px 3px;
             }
             
-            #editor, .code-highlight {
-                padding: 8px;
-                font-size: 14px;
+            .search-input {
+                width: 120px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Fixed Text Editor</h1>
-            <p class="subtitle">Now with working formatting and multi-page PDF export</p>
-        </header>
-
-        <div class="editor-container">
-            <div class="toolbar">
-                <div class="toolbar-group">
-                    <button class="format-btn" onclick="formatText('bold')"><b>Bold</b></button>
-                    <button class="format-btn" onclick="formatText('italic')"><i>Italic</i></button>
-                    <button class="format-btn" onclick="formatText('underline')"><u>Underline</u></button>
-                </div>
-                <div class="toolbar-group">
-                    <select id="fontSize" onchange="changeFontSize()">
-                        <option value="1">Small</option>
-                        <option value="2">Medium</option>
-                        <option value="3" selected>Large</option>
-                        <option value="4">X-Large</option>
-                        <option value="5">XX-Large</option>
-                    </select>
-                </div>
-                <div class="toolbar-group">
-                    <button class="download-btn" onclick="downloadFile('txt')">TXT</button>
-                    <button class="download-btn" onclick="downloadFile('pdf')">PDF</button>
-                    <button class="toggle-btn" onclick="toggleView()">Code View</button>
+    <header>
+        <div class="logo">
+            <i class="fas fa-code"></i>
+            <span>CodePad++</span>
+        </div>
+        <div class="menu">
+            <div class="search-container">
+                <input type="text" class="search-input" id="search-input" placeholder="Search...">
+                <button class="header-icon" id="search-btn" title="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            
+            <button class="header-icon" id="export-icon" title="Export">
+                <i class="fas fa-download"></i>
+            </button>
+            
+            <button class="header-icon" id="preview-toggle" title="Toggle Preview">
+                <i class="fas fa-eye"></i>
+            </button>
+            
+            <button class="header-icon" id="fullscreen-preview-btn" title="Fullscreen Preview">
+                <i class="fas fa-expand"></i>
+            </button>
+            
+            <div class="dropdown">
+                <button class="menu-btn"><i class="fas fa-file"></i> <span>File</span></button>
+                <div class="dropdown-content">
+                    <a href="#" id="new-file"><i class="fas fa-file"></i> New</a>
+                    <a href="#" id="save-file"><i class="fas fa-save"></i> Save</a>
+                    <a href="#" id="export-option"><i class="fas fa-download"></i> Export</a>
                 </div>
             </div>
+        </div>
+    </header>
 
-            <div class="editor-area">
-                <div class="line-numbers" id="lineNumbers">1</div>
-                <div id="editor" contenteditable="true" placeholder="Start typing or paste your text/code here..." oninput="updateLineNumbers(); updateHighlight();"></div>
-                <div class="code-highlight hidden" id="codeHighlight"></div>
+    <div class="container">
+        <div class="editor-container">
+            <div class="editor-header">
+                <div class="editor-title">editor.js</div>
+                <div class="editor-controls">
+                    <button title="Copy Code" id="copy-code"><i class="fas fa-copy"></i></button>
+                    <button title="Format Code" id="format-code"><i class="fas fa-indent"></i></button>
+                </div>
+            </div>
+            <div class="editor-wrapper">
+                <div class="line-numbers" id="line-numbers">1</div>
+                <div class="code-area">
+                    <textarea id="code-editor" spellcheck="false" placeholder="Start coding here..."></textarea>
+                </div>
             </div>
         </div>
 
-        <footer>
-            <p>Fixed Text Editor &copy; 2023 | Formatting fixed and multi-page PDF support added</p>
-        </footer>
+        <div class="preview-container hidden" id="preview-container">
+            <div class="preview-header">
+                <div class="preview-title">Live Preview</div>
+                <div class="preview-controls">
+                    <button title="Refresh Preview" id="refresh-preview"><i class="fas fa-sync-alt"></i></button>
+                    <button title="Close Preview" id="close-preview"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+        </div>
+    </div>
+
+    <!-- Fullscreen Preview -->
+    <div class="fullscreen-preview" id="fullscreen-preview">
+        <div class="fullscreen-header">
+            <div class="preview-title">Fullscreen Preview</div>
+            <div class="fullscreen-controls">
+                <button title="Refresh Preview" id="fullscreen-refresh"><i class="fas fa-sync-alt"></i></button>
+                <button title="Exit Fullscreen" id="exit-fullscreen"><i class="fas fa-compress"></i></button>
+            </div>
+        </div>
+        <iframe id="fullscreen-preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+
+    <!-- Export Options Modal -->
+    <div class="modal" id="export-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 20px; border-radius: 8px; min-width: 300px;">
+            <h3 style="margin-bottom: 15px;">Export Code</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button data-format="html" class="export-format-btn" style="padding: 10px; background: #f0f0f0; border: none; border-radius: 4px; cursor: pointer;">
+                    <i class="fas fa-code"></i> HTML
+                </button>
+                <button data-format="css" class="export-format-btn" style="padding: 10px; background: #f0f0f0; border: none; border-radius: 4px; cursor: pointer;">
+                    <i class="fab fa-css3-alt"></i> CSS
+                </button>
+                <button data-format="js" class="export-format-btn" style="padding: 10px; background: #f0f0f0; border: none; border-radius: 4px; cursor: pointer;">
+                    <i class="fab fa-js-square"></i> JavaScript
+                </button>
+                <button data-format="txt" class="export-format-btn" style="padding: 10px; background: #f0f0f0; border: none; border-radius: 4px; cursor: pointer;">
+                    <i class="fas fa-file-alt"></i> Text
+                </button>
+                <button data-format="pdf" class="export-format-btn" style="padding: 10px; background: #f0f0f0; border: none; border-radius: 4px; cursor: pointer;">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+                <button data-format="doc" class="export-format-btn" style="padding: 10px; background: #f0f0f0; border: none; border-radius: 4px; cursor: pointer;">
+                    <i class="fas fa-file-word"></i> Word
+                </button>
+            </div>
+            <button id="close-export-modal" style="margin-top: 15px; padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%;">
+                Cancel
+            </button>
+        </div>
     </div>
 
     <script>
-        const editor = document.getElementById('editor');
-        const lineNumbers = document.getElementById('lineNumbers');
-        const codeHighlight = document.getElementById('codeHighlight');
-        const fontSizeSelect = document.getElementById('fontSize');
-
-        // Initialize line numbers
-        updateLineNumbers();
-
-        function formatText(command) {
-            document.execCommand(command, false, null);
-            editor.focus();
-        }
-
-        function changeFontSize() {
-            const size = fontSizeSelect.value;
-            document.execCommand('fontSize', false, size);
-            editor.focus();
-        }
-
-        function updateLineNumbers() {
-            const text = editor.innerText || editor.textContent;
-            const lines = text.split('\n');
-            let lineNumbersHTML = '';
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeEditor = document.getElementById('code-editor');
+            const lineNumbers = document.getElementById('line-numbers');
+            const previewFrame = document.getElementById('preview-frame');
+            const previewContainer = document.getElementById('preview-container');
+            const fullscreenPreview = document.getElementById('fullscreen-preview');
+            const fullscreenPreviewFrame = document.getElementById('fullscreen-preview-frame');
+            const exportModal = document.getElementById('export-modal');
             
-            for (let i = 1; i <= lines.length; i++) {
-                lineNumbersHTML += i + '<br>';
+            // Buttons
+            const previewToggle = document.getElementById('preview-toggle');
+            const fullscreenPreviewBtn = document.getElementById('fullscreen-preview-btn');
+            const exportIcon = document.getElementById('export-icon');
+            const exportOption = document.getElementById('export-option');
+            const closePreview = document.getElementById('close-preview');
+            const exitFullscreen = document.getElementById('exit-fullscreen');
+            const refreshPreview = document.getElementById('refresh-preview');
+            const fullscreenRefresh = document.getElementById('fullscreen-refresh');
+            const newFileBtn = document.getElementById('new-file');
+            const copyCodeBtn = document.getElementById('copy-code');
+            const formatCodeBtn = document.getElementById('format-code');
+            const closeExportModal = document.getElementById('close-export-modal');
+            const exportFormatBtns = document.querySelectorAll('.export-format-btn');
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            
+            // Default code
+            const defaultCode = `// Welcome to CodePad++
+// This is a JavaScript code editor with live preview
+
+function greetUser(name) {
+    return "Hello, " + name + "! Welcome to CodePad++";
+}
+
+// Example usage
+const userName = "Developer";
+const greeting = greetUser(userName);
+console.log(greeting);
+
+// HTML Example
+const htmlExample = \`
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Web Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f0f8ff;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to CodePad++</h1>
+        <p>This is a live preview of your HTML code. Start editing to see changes!</p>
+        <button onclick="showMessage()">Click Me</button>
+    </div>
+    
+    <script>
+        function showMessage() {
+            alert('Hello from CodePad++!');
+        }
+    <\/script>
+</body>
+</html>
+\`;
+
+// Try editing this code and see the live preview update automatically!`;
+            
+            // Initialize editor
+            codeEditor.value = defaultCode;
+            updateLineNumbers();
+            
+            // Update line numbers when code changes
+            codeEditor.addEventListener('input', function() {
+                updateLineNumbers();
+            });
+            
+            // Update line numbers when user presses Enter or deletes lines
+            codeEditor.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Delete') {
+                    setTimeout(updateLineNumbers, 0);
+                }
+            });
+            
+            // Sync scrolling of line numbers with code editor
+            codeEditor.addEventListener('scroll', function() {
+                lineNumbers.scrollTop = codeEditor.scrollTop;
+            });
+            
+            // New file functionality
+            newFileBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('Are you sure you want to create a new file? Any unsaved changes will be lost.')) {
+                    codeEditor.value = '// Start coding here...\n';
+                    updateLineNumbers();
+                    showToast('New file created', 'success');
+                }
+            });
+            
+            // Copy code functionality
+            copyCodeBtn.addEventListener('click', function() {
+                codeEditor.select();
+                document.execCommand('copy');
+                showToast('Code copied to clipboard', 'success');
+            });
+            
+            // Format code functionality
+            formatCodeBtn.addEventListener('click', function() {
+                try {
+                    const formatted = formatJavaScript(codeEditor.value);
+                    codeEditor.value = formatted;
+                    updateLineNumbers();
+                    showToast('Code formatted', 'success');
+                } catch (e) {
+                    showToast('Error formatting code', 'error');
+                }
+            });
+            
+            // Toggle preview panel
+            previewToggle.addEventListener('click', function() {
+                previewContainer.classList.toggle('hidden');
+                if (previewContainer.classList.contains('hidden')) {
+                    previewToggle.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                    showToast('Preview hidden', 'success');
+                } else {
+                    previewToggle.innerHTML = '<i class="fas fa-eye"></i>';
+                    updatePreview();
+                    showToast('Preview shown', 'success');
+                }
+            });
+            
+            // Close preview
+            closePreview.addEventListener('click', function() {
+                previewContainer.classList.add('hidden');
+                previewToggle.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                showToast('Preview closed', 'success');
+            });
+            
+            // Fullscreen preview
+            fullscreenPreviewBtn.addEventListener('click', function() {
+                fullscreenPreview.classList.add('active');
+                updateFullscreenPreview();
+            });
+            
+            // Exit fullscreen
+            exitFullscreen.addEventListener('click', function() {
+                fullscreenPreview.classList.remove('active');
+            });
+            
+            // Refresh preview
+            refreshPreview.addEventListener('click', function() {
+                updatePreview();
+                showToast('Preview refreshed', 'success');
+            });
+            
+            // Refresh fullscreen preview
+            fullscreenRefresh.addEventListener('click', function() {
+                updateFullscreenPreview();
+                showToast('Fullscreen preview refreshed', 'success');
+            });
+            
+            // Export functionality
+            exportIcon.addEventListener('click', function() {
+                exportModal.style.display = 'flex';
+            });
+            
+            exportOption.addEventListener('click', function(e) {
+                e.preventDefault();
+                exportModal.style.display = 'flex';
+            });
+            
+            closeExportModal.addEventListener('click', function() {
+                exportModal.style.display = 'none';
+            });
+            
+            exportFormatBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const format = this.getAttribute('data-format');
+                    exportCode(format);
+                    exportModal.style.display = 'none';
+                });
+            });
+            
+            // Search functionality
+            searchBtn.addEventListener('click', function() {
+                const searchText = searchInput.value.trim();
+                if (searchText) {
+                    findInEditor(searchText);
+                }
+            });
+            
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const searchText = searchInput.value.trim();
+                    if (searchText) {
+                        findInEditor(searchText);
+                    }
+                }
+            });
+            
+            // Function to update line numbers
+            function updateLineNumbers() {
+                const lines = codeEditor.value.split('\n');
+                let numbersHTML = '';
+                
+                for (let i = 1; i <= lines.length; i++) {
+                    numbersHTML += i + '<br>';
+                }
+                
+                lineNumbers.innerHTML = numbersHTML;
+                
+                // Sync the height and scroll
+                lineNumbers.style.height = codeEditor.scrollHeight + 'px';
             }
             
-            lineNumbers.innerHTML = lineNumbersHTML;
-            
-            // Sync scroll position
-            lineNumbers.scrollTop = editor.scrollTop;
-        }
-
-        function updateHighlight() {
-            const content = editor.innerText || editor.textContent;
-            
-            // Simple language detection based on content
-            let language = 'plain';
-            if (content.includes('</') || content.includes('<html') || content.includes('<div')) {
-                language = 'html';
-            } else if (content.includes('function') || content.includes('var ') || content.includes('const ') || content.includes('let ')) {
-                language = 'javascript';
-            } else if (content.includes('{') && content.includes('}') && (content.includes(':') || content.includes(';'))) {
-                language = 'css';
+            // Function to update preview
+            function updatePreview() {
+                const code = codeEditor.value;
+                const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+                
+                try {
+                    // Check if the code contains HTML structure
+                    if (code.includes('<html') || code.includes('<body') || code.includes('<div') || code.includes('<!DOCTYPE')) {
+                        previewDoc.open();
+                        previewDoc.write(code);
+                        previewDoc.close();
+                    } else {
+                        // If it's just CSS or JS, wrap it in HTML structure
+                        previewDoc.open();
+                        previewDoc.write(`
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <style>
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        margin: 20px;
+                                        background-color: #f5f5f5;
+                                    }
+                                    .code-output {
+                                        background: white;
+                                        padding: 20px;
+                                        border-radius: 8px;
+                                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                                    }
+                                    ${code.includes('{') && !code.includes('function') ? code : ''}
+                                </style>
+                            </head>
+                            <body>
+                                <div class="code-output">
+                                    <h3>Code Output</h3>
+                                    <p>Your code output will appear here.</p>
+                                    <div id="output"></div>
+                                </div>
+                                <script>
+                                    try {
+                                        ${code.includes('function') || code.includes('var') || code.includes('const') || code.includes('let') ? code : ''}
+                                        
+                                        // If there's a function that outputs something, call it
+                                        if (typeof greetUser === 'function') {
+                                            document.getElementById('output').innerHTML = '<p>' + greetUser('Visitor') + '</p>';
+                                        }
+                                    } catch(e) {
+                                        console.log(e);
+                                    }
+                                <\/script>
+                            </body>
+                            </html>
+                        `);
+                        previewDoc.close();
+                    }
+                } catch (e) {
+                    console.error('Error updating preview:', e);
+                }
             }
             
-            // Apply syntax highlighting using Prism
-            codeHighlight.innerHTML = Prism.highlight(content, Prism.languages[language], language);
-            codeHighlight.className = `code-highlight language-${language}`;
-        }
-
-        function toggleView() {
-            const isHighlightVisible = !codeHighlight.classList.contains('hidden');
-            const toggleBtn = document.querySelector('.toggle-btn');
-            
-            if (isHighlightVisible) {
-                codeHighlight.classList.add('hidden');
-                editor.classList.remove('hidden');
-                toggleBtn.textContent = 'Code View';
-            } else {
-                updateHighlight();
-                codeHighlight.classList.remove('hidden');
-                editor.classList.add('hidden');
-                toggleBtn.textContent = 'Text View';
+            // Function to update fullscreen preview
+            function updateFullscreenPreview() {
+                const code = codeEditor.value;
+                const previewDoc = fullscreenPreviewFrame.contentDocument || fullscreenPreviewFrame.contentWindow.document;
+                
+                try {
+                    // Check if the code contains HTML structure
+                    if (code.includes('<html') || code.includes('<body') || code.includes('<div') || code.includes('<!DOCTYPE')) {
+                        previewDoc.open();
+                        previewDoc.write(code);
+                        previewDoc.close();
+                    } else {
+                        // If it's just CSS or JS, wrap it in HTML structure
+                        previewDoc.open();
+                        previewDoc.write(`
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <style>
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        margin: 20px;
+                                        background-color: #f5f5f5;
+                                    }
+                                    .code-output {
+                                        background: white;
+                                        padding: 20px;
+                                        border-radius: 8px;
+                                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                                    }
+                                    ${code.includes('{') && !code.includes('function') ? code : ''}
+                                </style>
+                            </head>
+                            <body>
+                                <div class="code-output">
+                                    <h3>Code Output</h3>
+                                    <p>Your code output will appear here.</p>
+                                    <div id="output"></div>
+                                </div>
+                                <script>
+                                    try {
+                                        ${code.includes('function') || code.includes('var') || code.includes('const') || code.includes('let') ? code : ''}
+                                        
+                                        // If there's a function that outputs something, call it
+                                        if (typeof greetUser === 'function') {
+                                            document.getElementById('output').innerHTML = '<p>' + greetUser('Visitor') + '</p>';
+                                        }
+                                    } catch(e) {
+                                        console.log(e);
+                                    }
+                                <\/script>
+                            </body>
+                            </html>
+                        `);
+                        previewDoc.close();
+                    }
+                } catch (e) {
+                    console.error('Error updating fullscreen preview:', e);
+                }
             }
-        }
-
-        function downloadFile(format) {
-            let content;
-            let filename = 'document';
             
-            if (format === 'txt') {
-                content = editor.innerText || editor.textContent;
-                const blob = new Blob([content], { type: 'text/plain' });
+            // Function to export code in different formats
+            function exportCode(format) {
+                const code = codeEditor.value;
+                let blob, filename, mimeType;
+                
+                switch(format) {
+                    case 'pdf':
+                        showToast('PDF export would require a server-side component', 'error');
+                        return;
+                    case 'html':
+                        mimeType = 'text/html';
+                        filename = 'code.html';
+                        break;
+                    case 'css':
+                        mimeType = 'text/css';
+                        filename = 'styles.css';
+                        break;
+                    case 'js':
+                        mimeType = 'application/javascript';
+                        filename = 'script.js';
+                        break;
+                    case 'txt':
+                        mimeType = 'text/plain';
+                        filename = 'code.txt';
+                        break;
+                    case 'doc':
+                        mimeType = 'application/msword';
+                        filename = 'code.doc';
+                        break;
+                    default:
+                        return;
+                }
+                
+                blob = new Blob([code], { type: mimeType });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${filename}.txt`;
+                a.download = filename;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-            } else if (format === 'pdf') {
-                // Using jsPDF for PDF generation
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
                 
-                // Get content from editor or code view
-                if (codeHighlight.classList.contains('hidden')) {
-                    content = editor.innerText || editor.textContent;
-                } else {
-                    content = codeHighlight.textContent;
-                }
-                
-                // Set PDF properties
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const pageHeight = doc.internal.pageSize.getHeight();
-                const margin = 10;
-                const lineHeight = 7;
-                let y = margin;
-                
-                // Split content into lines
-                const lines = doc.splitTextToSize(content, pageWidth - 2 * margin);
-                
-                // Add lines to PDF with page breaks
-                for (let i = 0; i < lines.length; i++) {
-                    if (y + lineHeight > pageHeight - margin) {
-                        doc.addPage();
-                        y = margin;
-                    }
-                    doc.text(lines[i], margin, y);
-                    y += lineHeight;
-                }
-                
-                // Save the PDF
-                doc.save(`${filename}.pdf`);
+                showToast(`Exported as ${filename}`, 'success');
             }
-        }
-
-        // Sync line numbers scroll with editor scroll
-        editor.addEventListener('scroll', function() {
-            lineNumbers.scrollTop = editor.scrollTop;
-        });
-
-        // Update line numbers on paste
-        editor.addEventListener('paste', function(e) {
-            // Allow the paste to happen first
-            setTimeout(function() {
+            
+            // Simple JavaScript formatter
+            function formatJavaScript(code) {
+                let formatted = '';
+                let indentLevel = 0;
+                const indentSize = 4;
+                
+                // Split into lines
+                const lines = code.split('\n');
+                
+                for (let line of lines) {
+                    // Trim the line
+                    let trimmed = line.trim();
+                    
+                    // Decrease indent if line ends with } or contains closing bracket
+                    if (trimmed.startsWith('}') || trimmed.startsWith(']') || trimmed.startsWith(')')) {
+                        indentLevel = Math.max(0, indentLevel - 1);
+                    }
+                    
+                    // Add current indent
+                    formatted += ' '.repeat(indentLevel * indentSize) + trimmed + '\n';
+                    
+                    // Increase indent if line ends with { or contains opening bracket
+                    if (trimmed.endsWith('{') || trimmed.endsWith('[') || trimmed.endsWith('(') || 
+                        trimmed.includes('function') || trimmed.includes('if') || trimmed.includes('for') || 
+                        trimmed.includes('while') || trimmed.includes('switch')) {
+                        indentLevel++;
+                    }
+                }
+                
+                return formatted;
+            }
+            
+            // Search function
+            function findInEditor(text) {
+                const editorContent = codeEditor.value;
+                const index = editorContent.toLowerCase().indexOf(text.toLowerCase());
+                
+                if (index === -1) {
+                    showToast('Text not found', 'error');
+                    return;
+                }
+                
+                // Highlight the found text
+                codeEditor.focus();
+                codeEditor.setSelectionRange(index, index + text.length);
+                
+                // Scroll to the found text
+                const lineHeight = 20;
+                const linesBefore = editorContent.substring(0, index).split('\n').length - 1;
+                codeEditor.scrollTop = linesBefore * lineHeight;
+                
+                showToast(`Found "${text}"`, 'success');
+            }
+            
+            // Toast notification function
+            function showToast(message, type = '') {
+                // Remove existing toast
+                const existingToast = document.querySelector('.toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+                
+                // Create new toast
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
+                    <span>${message}</span>
+                `;
+                
+                document.body.appendChild(toast);
+                
+                // Auto remove after 3 seconds
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+            
+            // Handle window resize for responsive behavior
+            window.addEventListener('resize', function() {
                 updateLineNumbers();
-                updateHighlight();
-            }, 0);
-        });
-
-        // Update line numbers when content changes (for all other changes)
-        editor.addEventListener('input', function() {
+            });
+            
+            // Initialize
             updateLineNumbers();
-            updateHighlight();
         });
     </script>
 </body>
