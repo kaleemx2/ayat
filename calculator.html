@@ -750,7 +750,8 @@ body { background: #e0e5ec; padding: 10px; }
       <div id="backup-status" class="status-message status-info">
         Last Backup: <span id="last-backup-time">Never</span><br>
         Total Patients: <span id="backup-patient-count">0</span><br>
-        Total Records: <span id="backup-record-count">0</span>
+        Total Records: <span id="backup-record-count">0</span><br>
+        Total Products: <span id="backup-product-count">0</span>
       </div>
     </div>
 
@@ -791,6 +792,7 @@ body { background: #e0e5ec; padding: 10px; }
 /* ======================= JS ======================= */
 $(document).ready(function() {
   const DATA_PREFIX = "patient_history_";
+  const PRODUCTS_STORAGE_KEY = "custom_products_list";
 
   // ================= DATE DISPLAY =================
   const today = new Date();
@@ -799,11 +801,8 @@ $(document).ready(function() {
                         String(today.getDate()).padStart(2, '0');
   $('#date-display').text("Date: " + formattedDate);
 
-  // ================= PRODUCTS LIST =================
-  let products = []; // This will be loaded from localStorage
-
   // ================= PRODUCT MANAGEMENT =================
-  const PRODUCTS_STORAGE_KEY = "custom_products_list";
+  let products = [];
 
   // Load products from localStorage or use default
   function loadProducts() {
@@ -1254,8 +1253,15 @@ $(document).ready(function() {
     return allData;
   }
 
+  // FIXED: Export now includes product data
   function exportToJSON() {
-    const allData = getAllPatientData();
+    const allData = {
+      patients: getAllPatientData(),
+      products: JSON.parse(localStorage.getItem(PRODUCTS_STORAGE_KEY) || '[]'),
+      exportDate: new Date().toISOString(),
+      exportType: 'full_backup'
+    };
+    
     const dataStr = JSON.stringify(allData, null, 2);
     const dataBlob = new Blob([dataStr], {type: 'application/json'});
     
@@ -1272,7 +1278,7 @@ $(document).ready(function() {
     localStorage.setItem('last_backup', new Date().toISOString());
     updateBackupStatus();
     
-    showStatus('Data exported successfully!', 'success');
+    showStatus('Full data exported successfully!', 'success');
   }
 
   function exportToCSV() {
@@ -1306,40 +1312,77 @@ $(document).ready(function() {
     showStatus('CSV exported successfully!', 'success');
   }
 
+  // FIXED: Import now handles product data
   function importFromFile(file) {
     const reader = new FileReader();
     reader.onload = function(e) {
       try {
         const importedData = JSON.parse(e.target.result);
         
-        // Merge with existing data
-        const currentData = getAllPatientData();
-        const mergedData = {...currentData, ...importedData};
-        
-        // Clear existing data
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key.startsWith(DATA_PREFIX)) {
-            localStorage.removeItem(key);
-          }
+        // Check if it's the new format with products or old format
+        if (importedData.patients && importedData.products) {
+          // New format with products
+          restoreFullBackup(importedData);
+        } else {
+          // Old format - only patient data
+          restorePatientDataOnly(importedData);
         }
-        
-        // Save merged data
-        for (const patientName in mergedData) {
-          if (mergedData.hasOwnProperty(patientName)) {
-            localStorage.setItem(DATA_PREFIX + patientName, JSON.stringify(mergedData[patientName]));
-          }
-        }
-        
-        updatePatientList();
-        updateBackupStatus();
-        showStatus('Data imported successfully!', 'success');
         
       } catch (error) {
         showStatus('Error importing file: ' + error.message, 'error');
       }
     };
     reader.readAsText(file);
+  }
+
+  function restoreFullBackup(importedData) {
+    // Clear existing data
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(DATA_PREFIX) || key === PRODUCTS_STORAGE_KEY) {
+        localStorage.removeItem(key);
+      }
+    }
+    
+    // Restore patient data
+    for (const patientName in importedData.patients) {
+      if (importedData.patients.hasOwnProperty(patientName)) {
+        localStorage.setItem(DATA_PREFIX + patientName, JSON.stringify(importedData.patients[patientName]));
+      }
+    }
+    
+    // Restore products
+    if (importedData.products && importedData.products.length > 0) {
+      localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(importedData.products));
+      products = importedData.products; // Update in-memory products
+    }
+    
+    updatePatientList();
+    updateBackupStatus();
+    showStatus('Full backup restored successfully!', 'success');
+  }
+
+  function restorePatientDataOnly(importedData) {
+    // Old import logic for backward compatibility
+    const currentData = getAllPatientData();
+    const mergedData = {...currentData, ...importedData};
+    
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(DATA_PREFIX)) {
+        localStorage.removeItem(key);
+      }
+    }
+    
+    for (const patientName in mergedData) {
+      if (mergedData.hasOwnProperty(patientName)) {
+        localStorage.setItem(DATA_PREFIX + patientName, JSON.stringify(mergedData[patientName]));
+      }
+    }
+    
+    updatePatientList();
+    updateBackupStatus();
+    showStatus('Patient data imported successfully!', 'success');
   }
 
   function updateBackupStatus() {
@@ -1353,9 +1396,11 @@ $(document).ready(function() {
     const allData = getAllPatientData();
     const patientCount = Object.keys(allData).length;
     const recordCount = Object.values(allData).reduce((total, records) => total + records.length, 0);
+    const productCount = products.length;
     
     $('#backup-patient-count').text(patientCount);
     $('#backup-record-count').text(recordCount);
+    $('#backup-product-count').text(productCount);
   }
 
   // ================= ENHANCED HISTORY MANAGEMENT =================
