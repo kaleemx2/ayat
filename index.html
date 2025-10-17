@@ -21,6 +21,11 @@
             --darker: #0A0A0A;
             --light: #E8E8E8;
             --card-bg: rgba(255, 255, 255, 0.1);
+            --tab-bg: #f8f8f8;
+            --tab-active: #ffffff;
+            --tab-border: #e0e0e0;
+            --text-dark: #333333;
+            --text-light: #666666;
         }
 
         body {
@@ -51,14 +56,13 @@
         .container {
             width: 100%;
             max-width: 420px;
-            background: var(--card-bg);
+            background: white;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             overflow: hidden;
             padding: 25px;
             position: relative;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-dark);
         }
 
         .header {
@@ -66,7 +70,7 @@
             align-items: center;
             margin-bottom: 25px;
             padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid var(--tab-border);
         }
 
         .avatar {
@@ -87,10 +91,11 @@
             font-size: 1.6rem;
             font-weight: 700;
             margin-bottom: 5px;
+            color: var(--text-dark);
         }
 
         .header-text p {
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--text-light);
             font-size: 0.9rem;
         }
 
@@ -119,6 +124,8 @@
             text-align: center;
             transition: all 0.3s ease;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
         }
 
         .stat-card:hover {
@@ -139,6 +146,127 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
+        /* Tabbed Interface */
+        .tab-container {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            background: var(--tab-bg);
+            border-radius: 10px 10px 0 0;
+            border: 1px solid var(--tab-border);
+            border-bottom: none;
+            padding: 0;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-right: 1px solid var(--tab-border);
+            position: relative;
+            background: var(--tab-bg);
+        }
+
+        .tab:last-child {
+            border-right: none;
+        }
+
+        .tab.active {
+            background: var(--tab-active);
+            font-weight: 600;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent);
+        }
+
+        .tab-number {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .tab-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-top: 3px;
+        }
+
+        .tab-content {
+            background: var(--tab-active);
+            border: 1px solid var(--tab-border);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            padding: 20px;
+            min-height: 150px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .tab-pane h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .tab-pane p {
+            color: var(--text-light);
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .tab-button {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 15px;
+            background: var(--primary);
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
         .quote {
             background: rgba(255, 255, 255, 0.1);
             border-left: 3px solid var(--accent);
@@ -149,6 +277,7 @@
             font-size: 0.9rem;
             line-height: 1.5;
             color: rgba(255, 255, 255, 0.9);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
         }
 
         .quote i {
@@ -179,6 +308,7 @@
             font-weight: 500;
             position: relative;
             overflow: hidden;
+            border: 1px solid var(--tab-border);
         }
 
         .mobile-button::before {
@@ -226,6 +356,11 @@
         }
 
         .button-5 {
+            background: linear-gradient(to right, #2A7B9B, #CAE5E8);
+            color: white;
+        }
+
+        .button-6 {
             background: linear-gradient(to right, #fa709a, #fee140);
             color: white;
         }
@@ -235,16 +370,6 @@
             font-size: 1.3rem;
             width: 30px;
             text-align: center;
-        }
-
-        .badge {
-            position: absolute;
-            right: 15px;
-            background: rgba(255, 255, 255, 0.3);
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: 600;
         }
 
         .social-links {
@@ -266,6 +391,7 @@
             text-decoration: none;
             transition: all 0.3s ease;
             backdrop-filter: blur(5px);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
         }
 
         .social-icon:hover {
@@ -277,9 +403,9 @@
             text-align: center;
             margin-top: 25px;
             padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-top: 1px solid var(--tab-border);
             font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-light);
         }
 
         .desktop-message {
@@ -357,24 +483,78 @@
             </div>
         </div>
 
+        <!-- Tabbed Interface -->
+        <div class="tab-container">
+            <div class="tabs">
+                <div class="tab active" data-tab="1">
+                    <div class="tab-number">01</div>
+                    <div class="tab-title">CASH BOOK</div>
+                </div>
+                <div class="tab" data-tab="2">
+                    <div class="tab-number">02</div>
+                    <div class="tab-title">INVOICE</div>
+                </div>
+                <div class="tab" data-tab="3">
+                    <div class="tab-number">03</div>
+                    <div class="tab-title">CALCNOTE</div>
+                </div>
+                <div class="tab" data-tab="4">
+                    <div class="tab-number">04</div>
+                    <div class="tab-title">CODEPAD++</div>
+                </div>
+                <div class="tab" data-tab="5">
+                    <div class="tab-number">05</div>
+                    <div class="tab-title">PRODUCTS</div>
+                </div>
+            </div>
+            
+            <div class="tab-content">
+                <div class="tab-pane active" id="tab-1">
+                    <h3>Cash Book Application</h3>
+                    <p>A comprehensive financial tracking system designed for small businesses to manage income, expenses, and generate detailed financial reports.</p>
+                    <a href="store.html" class="tab-button">Open App</a>
+                </div>
+                <div class="tab-pane" id="tab-2">
+                    <h3>Invoice Generator</h3>
+                    <p>Create professional invoices quickly with customizable templates, automatic calculations, and multiple export options.</p>
+                    <a href="calculator.html" class="tab-button">Open App</a>
+                </div>
+                <div class="tab-pane" id="tab-3">
+                    <h3>CalcNote</h3>
+                    <p>An all-in-one calculator and note-taking application that lets you perform calculations while keeping notes organized.</p>
+                    <a href="calcnote.html" class="tab-button">Open App</a>
+                </div>
+                <div class="tab-pane" id="tab-4">
+                    <h3>CodePad++</h3>
+                    <p>A feature-rich code editor with syntax highlighting, auto-completion, and live preview for web development.</p>
+                    <a href="pdf.html" class="tab-button">Open App</a>
+                </div>
+                <div class="tab-pane" id="tab-5">
+                    <h3>Product Management</h3>
+                    <p>Complete inventory management system with product categorization, stock tracking, and sales analytics.</p>
+                    <a href="Product_module.html" class="tab-button">Open App</a>
+                </div>
+            </div>
+        </div>
+
         <div class="quote">
             <i class="fas fa-quote-left"></i> O you who have believed, fear Allah and be with those who are truthful.
         </div>
 
         <div class="button-container">
             <a href="store.html" class="mobile-button button-1">
-                <span class="button-icon"><i class="fas fa-heartbeat"></i></span>
+                <span class="button-icon"><i class="fas fa-book"></i></span>
                 <span>Cash Book</span>
                 <span class="badge">New</span>
             </a>
 
             <a href="calculator.html" class="mobile-button button-2">
-                <span class="button-icon"><i class="fas fa-file-invoice-dollar"></i></span>
-                <span>Invoice Generator</span>
+                <span class="button-icon"><i class="fas fa-ambulance"></i></span>
+                <span>Patient Record</span>
             </a>
 
             <a href="calcnote.html" class="mobile-button button-3">
-                <span class="button-icon"><i class="fas fa-sticky-note"></i></span>
+                <span class="button-icon"><i class="fas fa-calculator"></i></span>
                 <span>CalcNote</span>
                 <span class="badge">Popular</span>
             </a>
@@ -384,13 +564,13 @@
                 <span>CodePad++</span>
             </a>
 
-            <a href="Product_module.html" class="mobile-button button-1">
-                <span class="button-icon"><i class="fas fa-heartbeat"></i></span>
+            <a href="Product_module.html" class="mobile-button button-5">
+                <span class="button-icon"><i class="fas fa-inr"></i></span>
                 <span>Product_module</span>
                 <span class="badge">New</span>
             </a>
 
-            <a href="contact.html" class="mobile-button button-5">
+            <a href="contact.html" class="mobile-button button-6">
                 <span class="button-icon"><i class="fas fa-envelope"></i></span>
                 <span>Contact Me</span>
             </a>
@@ -421,5 +601,27 @@
         <p>This portfolio is optimized for mobile devices. Please visit on a smartphone for the best experience, or resize your browser window to see the mobile layout.</p>
         <p>In the meantime, you can contact me at <strong>kaleem@example.com</strong> or connect with me on social media.</p>
     </div>
+
+    <script>
+        // Tab functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabPanes.forEach(p => p.classList.remove('active'));
+                    
+                    // Add active class to current tab and corresponding pane
+                    this.classList.add('active');
+                    document.getElementById(`tab-${tabId}`).classList.add('active');
+                });
+            });
+        });
+    </script>
 </body>
 </html>
