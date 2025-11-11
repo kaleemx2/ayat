@@ -616,8 +616,8 @@ body {
     <div id="hdrMenu" class="menu-list" aria-hidden="true">
 	  <button class="btn btn-add" id="add-product-btn"><i class="fa fa-capsules"></i> Add Product</button>
       <button class="btn btn-add" id="manage-products-btn"><i class="fa fa-edit"></i> Edit Product</button>
-      <button class="btn btn-clear" id="clear-all"><i class="fa fa-trash"></i> Clear All</button>
-</div>
+      <button class="btn btn-clear" id="clear-all-menu"><i class="fa fa-trash"></i> Clear All</button>
+    </div>
   </div>
 </div>
 
@@ -650,9 +650,9 @@ body {
   
   <!-- Action buttons for managing the bill -->
   <div class="action-buttons">
-    <button class="btn btn-add" id="add-row"><i class="fa fa-plus"></i> Add Row</button>
-    <button class="btn btn-clear" id="clear-all"><i class="fa fa-trash"></i> Clear All</button>
-</div>
+    <button class="btn btn-add" id="add-row"><i class="fa fa-plus"></i> Row</button>
+    <button class="btn btn-clear" id="clear-all"><i class="fa fa-trash"></i> Clear</button>
+  </div>
   
   <!-- Summary section with totals and discounts -->
   <div class="summary-section">
@@ -1780,6 +1780,13 @@ $(document).ready(function() {
     $('#discount-flat').val("");
     calculateTotal();
   });
+  // Clear All Button in Drop Down Menu
+$('#clear-all-menu').click(function() {
+  $('#clear-all').click(); // This calls your existing function
+  $('#hdrMenu').hide(); // Optional: hide the dropdown menu
+});
+  
+  
 
   // Discount input handlers
   $('#discount-percent, #discount-flat').on('input', calculateTotal);
