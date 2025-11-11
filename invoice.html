@@ -4,15 +4,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Patient Invoice</title>
+<!-- External Libraries -->
+<script type="text/javascript" nonce="67f3fd63391448979438518f934" src="//local.adguard.org?ts=1762499580533&type=content-script&dmn=kaleemx2.github.io&url=https%3A%2F%2Fkaleemx2.github.io%2Fayat%2Finvoice.html&app=mark.via.gp&css=3&js=1&rel=1&rji=1&sbe=1&stealth=1&st-dnt"></script>
+<script type="text/javascript" nonce="67f3fd63391448979438518f934" src="//local.adguard.org?ts=1762499580533&name=AdGuard%20Extra&type=user-script"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <style>
-/* ======================= CSS ======================= */
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-body { background: #e0e5ec; padding: 10px; }
+/* ======================= MAIN CSS STYLES ======================= */
+
+/* CSS Reset - Removes default browser styling */
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+  font-family: 'Segoe UI', Tahoma, sans-serif; 
+}
+
+/* Body styling with light gray background */
+body { 
+  background: #e0e5ec; 
+  padding: 10px; 
+}
+
+/* Main container with white background and shadow */
 .container {
   background: #fff; 
   border-radius: 12px; 
@@ -23,12 +41,15 @@ body { background: #e0e5ec; padding: 10px; }
   position: relative;
 }
 
+/* ================= HEADER STYLES ================= */
 .header { 
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 15px; 
 }
+
+/* Patient name input field */
 .header input {
   border: none; 
   font-size: 24px; 
@@ -39,17 +60,19 @@ body { background: #e0e5ec; padding: 10px; }
   padding: 8px; 
   outline: none;
   border-radius: 6px; 
-  background: #f8f8f8;
+  background: #f8f8f8 !important; /* FIX: Force background to prevent transparency */
   flex: 1;
+  color: #000 !important; /* FIX: Ensure text is visible */
 }
 
-/* ======= Date and Count =======*/
+/* Date and product count display */
 #simplified-info {
   display: flex;
   justify-content: flex-start;
   gap: 20px;
   width: 100%; 
 }
+
 #simplified-info div {
   font-size: 14px;
   font-weight: 600;
@@ -58,25 +81,41 @@ body { background: #e0e5ec; padding: 10px; }
   flex: 0 0 auto;  
 } 
 
-/* Modern table */
+/* ================= PRODUCTS TABLE STYLES ================= */
 .products-table { 
   width: 100%; 
   border-collapse: separate; 
   border-spacing: 0 8px; 
   margin-bottom: 15px; 
 }
+
 .products-table th, .products-table td {
-  padding: 10px 8px; font-size: 15px; text-align: left;
+  padding: 10px 8px; 
+  font-size: 15px; 
+  text-align: left;
 }
-.products-table th { background: #f1f3f6; color: #555; font-weight: 600; }
-.products-table td { background: #f9f9f9; border-radius: 8px; vertical-align: middle; }
+
+.products-table th { 
+  background: #f1f3f6; 
+  color: #555; 
+  font-weight: 600; 
+}
+
+.products-table td { 
+  background: #f9f9f9; 
+  border-radius: 8px; 
+  vertical-align: middle; 
+}
+
+/* Product search input */
 .product-search { 
   width: 100%; 
   padding: 10px; 
   border: 1px solid #ccc; 
   border-radius: 8px; 
 }   
-  
+
+/* Quantity input with color coding */
 .quantity-input {
   width: 60px;
   padding: 6px;
@@ -85,17 +124,24 @@ body { background: #e0e5ec; padding: 10px; }
   text-align: center;
   font-weight: 700;  
   font-size: 15px;
-  background-color: #f8d7da;
+  background-color: #f8d7da; /* Red background when empty */
   color: #721c24;
   transition: background 0.3s, color 0.3s;
 }
+
 .quantity-input:not(:placeholder-shown) {
-  background-color: #fff;
+  background-color: #fff; /* White background when has value */
   color: #000;
 }
-.mrp-display, .total-display { display: block; text-align: right; font-weight: 600; color: #222; }
 
-/* ================= BUTTON LAYOUT ================= */
+.mrp-display, .total-display { 
+  display: block; 
+  text-align: right; 
+  font-weight: 600; 
+  color: #222; 
+}
+
+/* ================= BUTTON STYLES ================= */
 .action-buttons { 
   display: flex; 
   justify-content: space-between; 
@@ -124,6 +170,7 @@ body { background: #e0e5ec; padding: 10px; }
   min-width: 120px;
 }
 
+/* Base button style */
 .btn { 
   padding: 8px 16px; 
   font-size: 14px; 
@@ -136,10 +183,13 @@ body { background: #e0e5ec; padding: 10px; }
   gap: 5px; 
   transition: all 0.3s;
 }
+
 .btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
+
+/* Button color variants */
 .btn-clear { background: #ff6b6b; color: #fff; }
 .btn-add { background: #1dd1a1; color: #fff; }
 .btn-save { background: #1976d2; color: #fff; }
@@ -148,8 +198,9 @@ body { background: #e0e5ec; padding: 10px; }
 .btn-export { background: #4caf50; color: #fff; }
 .btn-import { background: #ff9800; color: #fff; }
 
-/* Summary section */
+/* ================= SUMMARY SECTION STYLES ================= */
 .summary-section { margin-top: 10px; }
+
 .summary-row { 
   display: flex; 
   justify-content: space-between; 
@@ -157,14 +208,17 @@ body { background: #e0e5ec; padding: 10px; }
   font-size: 14px; 
   align-items: center;
 }   
+
 .summary-row span:last-child {
   font-weight: 700;  
   color: #000;
 }
+
 .summary-row.final-total span:last-child {
   font-weight: 700;
   color: #1976d2;
 }
+
 #subtotal, #discount-amount, #total-discount {
   font-size: 16px;
 } 
@@ -176,6 +230,7 @@ body { background: #e0e5ec; padding: 10px; }
   font-weight: 700; 
   color: #1976d2; 
 }
+
 .discount-input { 
   width: 70px; 
   padding: 6px; 
@@ -187,33 +242,7 @@ body { background: #e0e5ec; padding: 10px; }
   font-weight: 600;
 }
 
-/* Divider */
-.divider {
-  height: 1px;
-  background: #ddd;
-  margin: 15px 0;
-}
-
-/* Responsive mobile */
-@media (max-width: 600px) {
-  .info-section { justify-content: center; }
-  .action-buttons { flex-direction: row; gap: 10px; }
-  .action-buttons .btn { min-width: 100px; font-size: 13px; padding: 8px 12px; }
-  .bottom-buttons { flex-direction: row; gap: 10px; }
-  .bottom-buttons .btn { min-width: 100px; font-size: 13px; padding: 8px 12px; }
-  .products-table td { font-size: 14px; padding: 8px; }
-  .product-search { padding: 8px; font-size: 14px; }
-  .quantity-input { width: 50px; padding: 4px; }
-  .header { flex-direction: column; gap: 10px; }
-  .header input { font-size: 20px; }
-}
-
-@media (max-width: 400px) {
-  .action-buttons .btn, .bottom-buttons .btn { 
-    min-width: 90px; font-size: 12px; padding: 6px 10px; 
-  }
-}
-
+/* ================= SCREENSHOT BUTTON ================= */
 .screenshot-btn {
   position: absolute; 
   top: 10px; 
@@ -231,12 +260,13 @@ body { background: #e0e5ec; padding: 10px; }
   gap: 5px;
   transition: all 0.3s;
 }
+
 .screenshot-btn:hover { 
   background: #125aa0; 
   transform: translateY(-2px);
 }
 
-/* Status Messages */
+/* ================= STATUS MESSAGE STYLES ================= */
 .status-message {
   padding: 10px;
   border-radius: 6px;
@@ -269,7 +299,7 @@ body { background: #e0e5ec; padding: 10px; }
   border: 1px solid #ffeaa7;
 }
 
-/* Modal Styles */
+/* ================= MODAL STYLES ================= */
 .modal {
   position: fixed;
   z-index: 1000;
@@ -304,6 +334,7 @@ body { background: #e0e5ec; padding: 10px; }
   color: #000;
 }
 
+/* ================= HISTORY MANAGEMENT STYLES ================= */
 .history-item {
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -356,18 +387,7 @@ body { background: #e0e5ec; padding: 10px; }
   display: none;
 }
 
-.sync-status {
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
-  background: #333;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  z-index: 1001;
-}
-
+/* ================= BACKUP SECTION STYLES ================= */
 .backup-section {
   background: #f8f9fa;
   padding: 15px;
@@ -382,12 +402,12 @@ body { background: #e0e5ec; padding: 10px; }
   margin-top: 10px;
 }
 
-/* ==== DROPDOWN PRODUCTS STYLE ===== */
 .backup-buttons .btn {
   flex: 1;
   justify-content: center;
 }
-  /* ================= AUTCOMPLETE DROPDOWN STYLING ================= */
+
+/* ================= AUTCOMPLETE DROPDOWN STYLES ================= */
 .ui-autocomplete {
     max-height: 200px;
     overflow-y: auto;
@@ -428,187 +448,46 @@ body { background: #e0e5ec; padding: 10px; }
     padding: 8px 12px !important;
 }
 
-/* New History Management Styles */
-.history-management {
-  margin-top: 15px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
+/* ================= RESPONSIVE STYLES ================= */
+@media (max-width: 600px) {
+  .info-section { justify-content: center; }
+  .action-buttons { flex-direction: row; gap: 10px; }
+  .action-buttons .btn { min-width: 100px; font-size: 13px; padding: 8px 12px; }
+  .bottom-buttons { flex-direction: row; gap: 10px; }
+  .bottom-buttons .btn { min-width: 100px; font-size: 13px; padding: 8px 12px; }
+  .products-table td { font-size: 14px; padding: 8px; }
+  .product-search { padding: 8px; font-size: 14px; }
+  .quantity-input { width: 50px; padding: 4px; }
+  .header { flex-direction: column; gap: 10px; }
+  .header input { font-size: 20px; }
 }
 
-.history-management h4 {
-  margin-bottom: 10px;
-  color: #1976d2;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+@media (max-width: 400px) {
+  .action-buttons .btn, .bottom-buttons .btn { 
+    min-width: 90px; font-size: 12px; padding: 6px 10px; 
+  }
 }
 
-.history-actions {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
+/* ================= ADDITIONAL UTILITY STYLES ================= */
+.divider {
+  height: 1px;
+  background: #ddd;
+  margin: 15px 0;
 }
 
-.history-actions .btn {
-  flex: 1;
-  min-width: 140px;
-  justify-content: center;
-}
-
-.delete-history-btn {
-  background: #dc3545;
+.sync-status {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: #333;
   color: white;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
   font-size: 12px;
-  margin-left: 10px;
+  z-index: 1001;
 }
 
-.delete-history-btn:hover {
-  background: #c82333;
-}
-
-.history-item {
-  position: relative;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  margin: 10px 0;
-  background: #f9f9f9;
-}
-
-.history-date {
-  font-weight: bold;
-  color: #1976d2;
-  margin-bottom: 10px;
-  font-size: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.history-products {
-  margin: 10px 0;
-}
-
-.history-product {
-  display: flex;
-  justify-content: space-between;
-  padding: 2px 0;
-  font-size: 14px;
-}
-
-.history-totals {
-  border-top: 1px solid #ddd;
-  padding-top: 10px;
-  margin-top: 10px;
-}
-
-.history-total-row {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 600;
-}
-
-.final-amount {
-  color: #1976d2;
-  font-size: 16px;
-}
-
-.daily-report-section {
-  margin-top: 20px;
-  padding: 15px;
-  background: #e8f4fd;
-  border-radius: 8px;
-  border: 1px solid #b3d7ff;
-}
-
-.daily-report-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.date-filter {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.date-filter input {
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.daily-report-list {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.patient-day-summary {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 12px;
-  margin: 8px 0;
-}
-
-.patient-day-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #eee;
-}
-
-.patient-day-name {
-  font-weight: bold;
-  color: #1976d2;
-  font-size: 15px;
-}
-
-.patient-day-total {
-  font-weight: bold;
-  color: #28a745;
-}
-
-.no-history {
-  text-align: center;
-  color: #6c757d;
-  font-style: italic;
-  padding: 20px;
-}
-
-.confirm-delete {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 6px;
-  padding: 10px;
-  margin: 10px 0;
-  text-align: center;
-}
-
-.confirm-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-.confirm-buttons .btn {
-  min-width: 80px;
-}
-
-/* Add Product Modal Styles */
+/* Form group styling for modals */
 .form-group {
   margin: 15px 0;
 }
@@ -630,24 +509,121 @@ body { background: #e0e5ec; padding: 10px; }
   border-color: #1976d2;
   outline: none;
 }
+
+/* NEW: Product management styles */
+.product-item {
+  transition: all 0.3s ease;
+}
+
+.product-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.product-edit-form input:focus {
+  border-color: #1976d2 !important;
+  outline: none;
+  box-shadow: 0 0 5px rgba(25, 118, 210, 0.3);
+}
+
+/* Drop Down Menu */
+.hdr-menu {
+  position: relative;
+  display: inline-block;
+}
+
+/* Menu button only */
+#hdrMenuBtn {
+  background-color: #f0f0f0; /* Light gray background for the button */
+  color: #333;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap; /* Prevents word breaking */
+}
+
+/* Drop Down Menu list */
+.hdr-menu .menu-list {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 40px;
+  background: #f9f9f9;
+  border: 1px solid #e6e9ef;
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 6px 18px rgba(15,20,40,0.08);
+  z-index: 200;
+}
+
+/* Buttons inside dropdown */
+.hdr-menu .menu-list button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: #333;
+  border: 1px solid red;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap; /* Prevents word breaking */
+  margin-bottom: 10px;
+}
+
+/* Flex alignment */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+.info-section,
+.hdr-menu {
+  display: flex;
+  align-items: center;
+}
 </style>
 </head>
+
 <body>
+<!-- ================= MAIN HTML STRUCTURE ================= -->
 <div class="container" id="billing-container">
+  <!-- Screenshot button for capturing the bill -->
   <button class="screenshot-btn" id="screenshot-btn">
     <i class="fa fa-camera"></i> 
   </button>
   
+  <!-- Patient name input with datalist for autocomplete -->
   <div class="header">
     <input type="text" id="name" placeholder="PATIENT NAME" list="patient-list">
     <datalist id="patient-list"></datalist>
   </div>
   
-  <!-- SIMPLIFIED DATE & TOTAL PRODUCTS -->
-  <div class="info-section" id="simplified-info">
-    <div id="date-display"></div>
-  </div> 
   
+  
+ <div class="top-bar">
+  <!-- Date display section -->
+  <div class="info-section" id="simplified-info">
+    <div id="date-display">10 Nov 2025</div>
+  </div>
+
+  <!-- Drop Down Menu -->
+  <div class="hdr-menu">
+    <button id="hdrMenuBtn" class="small"><i class="fa fa-bars"></i> Menu</button>
+    <div id="hdrMenu" class="menu-list" aria-hidden="true">
+	  <button class="btn btn-add" id="add-product-btn"><i class="fa fa-capsules"></i> Add Product</button>
+      <button class="btn btn-add" id="manage-products-btn"><i class="fa fa-edit"></i> Edit Product</button>
+      <button class="btn btn-clear" id="clear-all"><i class="fa fa-trash"></i> Clear All</button>
+</div>
+  </div>
+</div>
+
+
+
+  <!-- Products table for billing items -->
   <table class="products-table">
     <thead>
       <tr>
@@ -667,24 +643,25 @@ body { background: #e0e5ec; padding: 10px; }
     </tbody>
   </table>
   
-  <!-- SIMPLIFIED DATE & TOTAL PRODUCTS -->
+  <!-- Total products count display -->
   <div class="info-section" id="simplified-info">
     <div id="total-products-display"></div>
   </div>
   
+  <!-- Action buttons for managing the bill -->
   <div class="action-buttons">
     <button class="btn btn-add" id="add-row"><i class="fa fa-plus"></i> Add Row</button>
-    <button class="btn btn-add" id="add-product-btn"><i class="fa fa-capsules"></i> Add Product</button>
     <button class="btn btn-clear" id="clear-all"><i class="fa fa-trash"></i> Clear All</button>
 </div>
   
+  <!-- Summary section with totals and discounts -->
   <div class="summary-section">
     <div class="summary-row"><span>Total All</span><span id="subtotal">₹0.00</span></div>
     
     <div class="summary-row">
       <span>Dis. %</span>
       <input type="number" class="discount-input" id="discount-percent" value="" min="0" max="100" placeholder="0">
-      <span>Dis. Amt (₹)</span>
+      <span>Dis. (₹)</span>
       <input type="number" class="discount-input" id="discount-flat" value="" min="0" placeholder="0">
     </div>
     
@@ -703,14 +680,18 @@ body { background: #e0e5ec; padding: 10px; }
   
   <div class="divider"></div>
   
+  <!-- Bottom action buttons -->
   <div class="bottom-buttons">
     <button class="btn btn-save" id="save-btn"><i class="fa fa-save"></i> Save</button>
     <button class="btn btn-history" id="history-btn"><i class="fa fa-history"></i> History</button>
     <button class="btn btn-sync" id="backup-btn"><i class="fa fa-download"></i> Backup</button>
   </div>
 
+  <!-- Status message display area -->
   <div id="status-message"></div>
 </div>
+
+<!-- ================= MODAL DIALOGS ================= -->
 
 <!-- Patient History Modal -->
 <div id="history-modal" class="modal">
@@ -788,44 +769,72 @@ body { background: #e0e5ec; padding: 10px; }
   </div>
 </div>
 
-<script>
-/* ======================= JS ======================= */
-$(document).ready(function() {
-  const DATA_PREFIX = "patient_history_";
-  const PRODUCTS_STORAGE_KEY = "custom_products_list";
+<!-- NEW: Manage Products Modal -->
+<div id="manage-products-modal" class="modal">
+  <div class="modal-content" style="max-width: 700px;">
+    <span class="close">&times;</span>
+    <h3><i class="fa fa-edit"></i> Manage Products</h3>
+    
+    <div class="backup-section">
+      <div class="form-group">
+        <label>Search Product:</label>
+        <input type="text" id="search-product" class="product-search" placeholder="Search products..." style="width: 100%; padding: 10px; margin: 8px 0;">
+      </div>
+      
+      <div id="products-list" style="max-height: 400px; overflow-y: auto; margin: 15px 0;">
+        <!-- Products will be listed here dynamically -->
+      </div>
+      
+      <div class="backup-buttons">
+        <button class="btn btn-save" id="close-manage-products">
+          <i class="fa fa-times"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-  // ================= DATE DISPLAY =================
+<script>
+/* ======================= JAVASCRIPT FUNCTIONALITY ======================= */
+
+// Main function that runs when the document is ready
+$(document).ready(function() {
+  // Constants for localStorage keys
+  const DATA_PREFIX = "patient_history_"; // Prefix for patient data in localStorage
+  const PRODUCTS_STORAGE_KEY = "custom_products_list"; // Key for storing products
+
+  // ================= DATE DISPLAY INITIALIZATION =================
+  // Display current date in the format YYYY/MM/DD
   const today = new Date();
   const formattedDate = today.getFullYear() + "/" + 
                         String(today.getMonth() + 1).padStart(2, '0') + "/" + 
                         String(today.getDate()).padStart(2, '0');
   $('#date-display').text("Date: " + formattedDate);
 
-  // ================= PRODUCT MANAGEMENT =================
-  let products = [];
+  // ================= PRODUCT MANAGEMENT SYSTEM =================
+  let products = []; // Array to store all products
 
-  // Load products from localStorage or use default
+  // Load products from localStorage or initialize with default products
   function loadProducts() {
       const savedProducts = localStorage.getItem(PRODUCTS_STORAGE_KEY);
       if (savedProducts) {
           return JSON.parse(savedProducts);
       } else {
-          // Save default products to localStorage
+          // Default products if none exist
           const defaultProducts = [
             { name: "Medicine", mrp: 1 },
- 
           ];
           saveProductsToStorage(defaultProducts);
           return defaultProducts;
       }
   }
 
-  // Save products to localStorage
+  // Save products array to localStorage
   function saveProductsToStorage(productsArray) {
       localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(productsArray));
   }
 
-  // Add new product
+  // Add a new product to the system
   function addNewProduct() {
       const name = $('#new-product-name').val().trim();
       const mrp = parseFloat($('#new-product-mrp').val());
@@ -847,23 +856,159 @@ $(document).ready(function() {
           return;
       }
       
-      // Add new product
+      // Add new product to the array
       const newProduct = { name: name.toUpperCase(), mrp: mrp };
       products.push(newProduct);
       
       // Save to localStorage
       saveProductsToStorage(products);
       
-      // Close modal and show success
+      // Close modal and show success message
       $('#add-product-modal').hide();
       showStatus(`Product "${name}" added successfully!`, 'success');
       
-      // Clear form
+      // Clear form inputs
       $('#new-product-name').val('');
       $('#new-product-mrp').val('');
   }
 
-  // Initialize product management
+  // NEW: Show the manage products modal
+  function showManageProductsModal() {
+    $('#manage-products-modal').show();
+    loadProductsList();
+  }
+
+  // NEW: Load and display the products list
+  function loadProductsList() {
+    const searchTerm = $('#search-product').val().toLowerCase();
+    const productsList = $('#products-list');
+    productsList.empty();
+    
+    // Filter products based on search term
+    const filteredProducts = products.filter(product => 
+      product.name.toLowerCase().includes(searchTerm)
+    );
+    
+    if (filteredProducts.length === 0) {
+      productsList.html('<div class="no-history" style="text-align: center; padding: 20px;">No products found</div>');
+      return;
+    }
+    
+    // Create HTML for each product
+    filteredProducts.forEach((product, index) => {
+      const productHtml = `
+        <div class="product-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #ddd; border-radius: 6px; margin: 8px 0; background: white;">
+          <div style="flex: 1;">
+            <div style="font-weight: bold; color: #1976d2;">${product.name}</div>
+            <div style="font-size: 14px; color: #666;">MRP: ₹${product.mrp.toFixed(2)}</div>
+          </div>
+          <div>
+            <button class="btn btn-save edit-product-btn" data-index="${index}" style="padding: 6px 12px; margin: 0 4px;">
+              <i class="fa fa-edit"></i> Edit
+            </button>
+            <button class="btn btn-clear delete-product-btn" data-index="${index}" style="padding: 6px 12px; margin: 0 4px;">
+              <i class="fa fa-trash"></i> Delete
+            </button>
+          </div>
+        </div>
+      `;
+      productsList.append(productHtml);
+    });
+    
+    // Attach event handlers to edit and delete buttons
+    $('.edit-product-btn').click(function() {
+      const index = $(this).data('index');
+      editProduct(index);
+    });
+    
+    $('.delete-product-btn').click(function() {
+      const index = $(this).data('index');
+      deleteProduct(index);
+    });
+  }
+
+  // NEW: Edit a product
+  function editProduct(index) {
+    const product = products[index];
+    
+    // Create edit form HTML
+    const editHtml = `
+      <div class="product-edit-form" style="display: flex; gap: 10px; align-items: center; padding: 12px; border: 2px solid #1976d2; border-radius: 6px; margin: 8px 0; background: #f0f8ff;">
+        <div style="flex: 1;">
+          <input type="text" class="edit-product-name" value="${product.name}" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 5px;">
+          <input type="number" class="edit-product-mrp" value="${product.mrp}" step="0.01" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div>
+          <button class="btn btn-save save-product-btn" data-index="${index}" style="padding: 6px 12px; margin: 0 4px;">
+            <i class="fa fa-save"></i> Save
+          </button>
+          <button class="btn btn-clear cancel-edit-btn" style="padding: 6px 12px; margin: 0 4px;">
+            <i class="fa fa-times"></i> Cancel
+          </button>
+        </div>
+      </div>
+    `;
+    
+    // Replace the product item with edit form
+    $(`.product-item:has(.edit-product-btn[data-index="${index}"])`).html(editHtml);
+    
+    // Attach save event
+    $('.save-product-btn').click(function() {
+      const saveIndex = $(this).data('index');
+      saveProductEdit(saveIndex);
+    });
+    
+    $('.cancel-edit-btn').click(function() {
+      loadProductsList(); // Reload the list to cancel editing
+    });
+  }
+
+  // NEW: Save product edits
+  function saveProductEdit(index) {
+    const newName = $(`.edit-product-name`).val().trim();
+    const newMrp = parseFloat($(`.edit-product-mrp`).val());
+    
+    if (!newName) {
+      showStatus('Please enter product name', 'error');
+      return;
+    }
+    
+    if (isNaN(newMrp) || newMrp <= 0) {
+      showStatus('Please enter valid MRP', 'error');
+      return;
+    }
+    
+    // Check for duplicate product name (excluding current product)
+    const duplicate = products.find((p, i) => i !== index && p.name.toLowerCase() === newName.toLowerCase());
+    if (duplicate) {
+      showStatus('Product name already exists!', 'error');
+      return;
+    }
+    
+    // Update product in the array
+    products[index].name = newName.toUpperCase();
+    products[index].mrp = newMrp;
+    
+    // Save to localStorage
+    saveProductsToStorage(products);
+    
+    showStatus(`Product "${newName}" updated successfully!`, 'success');
+    loadProductsList(); // Reload the list
+  }
+
+  // NEW: Delete a product
+  function deleteProduct(index) {
+    const productName = products[index].name;
+    
+    if (confirm(`Are you sure you want to delete product "${productName}"?`)) {
+      products.splice(index, 1);
+      saveProductsToStorage(products);
+      showStatus(`Product "${productName}" deleted successfully!`, 'success');
+      loadProductsList(); // Reload the list
+    }
+  }
+
+  // Initialize product management system
   function initProductManagement() {
       // Load products from localStorage
       products = loadProducts();
@@ -876,19 +1021,32 @@ $(document).ready(function() {
       // Save new product event
       $('#save-new-product').click(addNewProduct);
       
-      // Close modal
+      // Close modal events
       $('#add-product-modal .close').click(function() {
           $('#add-product-modal').hide();
       });
+      
+      // NEW: Manage products button event
+      $('#manage-products-btn').click(showManageProductsModal);
+      
+      // NEW: Close manage products modal
+      $('#close-manage-products').click(function() {
+          $('#manage-products-modal').hide();
+      });
+      
+      // NEW: Search products in manage modal
+      $('#search-product').on('input', loadProductsList);
   }
 
   // ================= DATA STORAGE FUNCTIONS =================
   
+  // Generate a safe filename for patient data
   function getPatientFileName(patientName) {
     const safeName = patientName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
     return `${DATA_PREFIX}${safeName}`;
   }
 
+  // Load patient data from localStorage
   function loadPatientData(patientName) {
     try {
       const fileName = getPatientFileName(patientName);
@@ -899,6 +1057,7 @@ $(document).ready(function() {
     }
   }
 
+  // Save current bill data for a patient
   function savePatientData() {
     const name = $('#name').val().trim();
     if (!name) {
@@ -906,6 +1065,7 @@ $(document).ready(function() {
       return;
     }
 
+    // Get current date and time
     const today = new Date();
     const dateStr = today.getFullYear() + "/" + 
                     String(today.getMonth() + 1).padStart(2, '0') + "/" + 
@@ -915,6 +1075,7 @@ $(document).ready(function() {
                     String(today.getMinutes()).padStart(2, '0') + ":" + 
                     String(today.getSeconds()).padStart(2, '0');
 
+    // Create bill data object
     const billData = {
       date: dateStr,
       time: timeStr,
@@ -927,6 +1088,7 @@ $(document).ready(function() {
       finalTotal: parseFloat($('#final-total').text().replace('₹','')) || 0
     };
 
+    // Extract product data from table
     $('#products-body tr').each(function() {
       const productName = $(this).find('.product-search').val();
       const mrp = parseFloat($(this).find('.mrp-display').text()) || 0;
@@ -943,14 +1105,17 @@ $(document).ready(function() {
       }
     });
 
+    // Validate that at least one product is added
     if (billData.products.length === 0) {
       showStatus('Please add at least one product', 'error');
       return;
     }
 
+    // Load existing patient data and add new bill
     const patientData = loadPatientData(name);
     patientData.push(billData);
     
+    // Save updated data to localStorage
     const fileName = getPatientFileName(name);
     localStorage.setItem(fileName, JSON.stringify(patientData));
     
@@ -959,9 +1124,11 @@ $(document).ready(function() {
     updateBackupStatus();
   }
 
+  // Update the patient list for autocomplete
   function updatePatientList() {
     const patientNames = [];
     
+    // Extract all patient names from localStorage
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key.startsWith(DATA_PREFIX)) {
@@ -973,6 +1140,7 @@ $(document).ready(function() {
     
     patientNames.sort();
     
+    // Update the datalist with patient names
     const datalist = $('#patient-list');
     datalist.empty();
     
@@ -981,6 +1149,7 @@ $(document).ready(function() {
     });
   }
 
+  // Display status messages to user
   function showStatus(message, type = 'info') {
     const statusDiv = $('#status-message');
     statusDiv.removeClass('status-success status-error status-info status-warning')
@@ -988,6 +1157,7 @@ $(document).ready(function() {
              .text(message)
              .show();
     
+    // Auto-hide after 5 seconds
     setTimeout(() => {
       statusDiv.fadeOut();
     }, 5000);
@@ -995,6 +1165,7 @@ $(document).ready(function() {
 
   // ================= BACKUP & RESTORE FUNCTIONS =================
   
+  // Get all patient data from localStorage
   function getAllPatientData() {
     const allData = {};
     for (let i = 0; i < localStorage.length; i++) {
@@ -1011,7 +1182,7 @@ $(document).ready(function() {
     return allData;
   }
 
-  // FIXED: Export now includes product data
+  // Export all data to JSON file
   function exportToJSON() {
     const allData = {
       patients: getAllPatientData(),
@@ -1039,10 +1210,12 @@ $(document).ready(function() {
     showStatus('Full data exported successfully!', 'success');
   }
 
+  // Export data to CSV file
   function exportToCSV() {
     const allData = getAllPatientData();
     let csvContent = 'Patient Name,Date,Time,Product,MRP,Quantity,Total,Discount %,Discount Amount,Final Total\n';
     
+    // Convert data to CSV format
     for (const patientName in allData) {
       if (allData.hasOwnProperty(patientName)) {
         const records = allData[patientName];
@@ -1070,7 +1243,7 @@ $(document).ready(function() {
     showStatus('CSV exported successfully!', 'success');
   }
 
-  // FIXED: Import now handles product data
+  // Import data from file
   function importFromFile(file) {
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -1093,6 +1266,7 @@ $(document).ready(function() {
     reader.readAsText(file);
   }
 
+  // Restore full backup (patients + products)
   function restoreFullBackup(importedData) {
     // Clear existing data
     for (let i = 0; i < localStorage.length; i++) {
@@ -1120,11 +1294,12 @@ $(document).ready(function() {
     showStatus('Full backup restored successfully!', 'success');
   }
 
+  // Restore only patient data (backward compatibility)
   function restorePatientDataOnly(importedData) {
-    // Old import logic for backward compatibility
     const currentData = getAllPatientData();
     const mergedData = {...currentData, ...importedData};
     
+    // Clear existing patient data
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key.startsWith(DATA_PREFIX)) {
@@ -1132,6 +1307,7 @@ $(document).ready(function() {
       }
     }
     
+    // Restore merged data
     for (const patientName in mergedData) {
       if (mergedData.hasOwnProperty(patientName)) {
         localStorage.setItem(DATA_PREFIX + patientName, JSON.stringify(mergedData[patientName]));
@@ -1143,6 +1319,7 @@ $(document).ready(function() {
     showStatus('Patient data imported successfully!', 'success');
   }
 
+  // Update backup status display
   function updateBackupStatus() {
     const lastBackup = localStorage.getItem('last_backup');
     if (lastBackup) {
@@ -1176,6 +1353,7 @@ $(document).ready(function() {
           return;
       }
 
+      // Sort by timestamp (newest first)
       patientData.sort((a, b) => b.timestamp - a.timestamp);
       
       $('#history-patient-name').text(name);
@@ -1198,6 +1376,7 @@ $(document).ready(function() {
       `;
       historyList.append(managementSection);
       
+      // Display each history record
       patientData.forEach((record, index) => {
           const historyItem = `
               <div class="history-item" data-timestamp="${record.timestamp}">
@@ -1259,6 +1438,7 @@ $(document).ready(function() {
       $('#history-modal').show();
   }
 
+  // Attach event handlers for history management
   function attachHistoryManagementEvents(patientName) {
       // Delete single transaction
       $('.delete-history-btn').off().click(function(e) {
@@ -1284,6 +1464,7 @@ $(document).ready(function() {
       });
   }
 
+  // Show confirmation dialog for delete operations
   function showDeleteConfirmation(patientName, timestamp, deleteAll = false) {
       const message = deleteAll ? 
           'Are you sure you want to delete ALL history for this patient? This action cannot be undone.' :
@@ -1321,6 +1502,7 @@ $(document).ready(function() {
       });
   }
 
+  // Delete a single transaction
   function deleteSingleTransaction(patientName, timestamp) {
       const patientData = loadPatientData(patientName);
       const updatedData = patientData.filter(record => record.timestamp !== timestamp);
@@ -1333,6 +1515,7 @@ $(document).ready(function() {
       updateBackupStatus();
   }
 
+  // Delete all history for a patient
   function deleteAllPatientHistory(patientName) {
       const fileName = getPatientFileName(patientName);
       localStorage.removeItem(fileName);
@@ -1343,6 +1526,7 @@ $(document).ready(function() {
       updateBackupStatus();
   }
 
+  // Export patient history to JSON file
   function exportPatientHistory(patientName) {
       const patientData = loadPatientData(patientName);
       const dataStr = JSON.stringify(patientData, null, 2);
@@ -1360,6 +1544,7 @@ $(document).ready(function() {
       showStatus(`Patient history exported for ${patientName}`, 'success');
   }
 
+  // Generate daily transaction report
   function generateDailyReport(date) {
     const allPatients = getAllPatientData();
     let reportHTML = '';
@@ -1436,23 +1621,7 @@ $(document).ready(function() {
     return reportHTML;
   }
 
-  function getAllPatientData() {
-      const allData = {};
-      for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key.startsWith(DATA_PREFIX)) {
-              const patientName = key.replace(DATA_PREFIX, '');
-              try {
-                  allData[patientName] = JSON.parse(localStorage.getItem(key));
-              } catch (e) {
-                  console.error('Error parsing data for:', patientName);
-              }
-          }
-      }
-      return allData;
-  }
-
-  // ================= AUTOCOMPLETE =================
+  // ================= AUTOCOMPLETE FUNCTIONALITY =================
   function initAutocompleteForRow(row) {
     row.find('.product-search').autocomplete({
       source: function(request, response) {
@@ -1471,7 +1640,7 @@ $(document).ready(function() {
     });
   }
 
-  // ================= CALCULATE TOTALS =================
+  // ================= CALCULATION FUNCTIONS =================
   function calculateRowTotal(row) {
     const mrp = parseFloat(row.find('.mrp-display').text()) || 0;
     let qtyVal = parseInt(row.find('.quantity-input').val());
@@ -1526,13 +1695,14 @@ $(document).ready(function() {
     }
   }
 
+  // Attach events to quantity inputs
   function attachEvents() {
     $('.quantity-input').off().on('input', function() {
       calculateRowTotal($(this).closest('tr'));
     });
   }
 
-  // ================= INITIALIZE =================
+  // ================= INITIALIZATION =================
   
   // Initialize product management FIRST
   initProductManagement();
@@ -1544,6 +1714,7 @@ $(document).ready(function() {
   updatePatientList();
   updateBackupStatus();
   
+  // Button event handlers
   $('#save-btn').click(savePatientData);
   $('#history-btn').click(showEnhancedHistoryManagement);
   $('#backup-btn').click(function() {
@@ -1563,16 +1734,18 @@ $(document).ready(function() {
     }
   });
 
+  // Modal close handlers
   $('.close').click(function() {
-    $('#history-modal, #backup-modal, #add-product-modal').hide();
+    $('#history-modal, #backup-modal, #add-product-modal, #manage-products-modal').hide();
   });
   
   $(window).click(function(event) {
     if ($(event.target).is('.modal')) {
-      $('.modal').hide();
+      $('#history-modal, #backup-modal, #add-product-modal, #manage-products-modal').hide();
     }
   });
 
+  // Add row button
   $('#add-row').click(function() {
     const newRow = $(`
       <tr>
@@ -1587,6 +1760,7 @@ $(document).ready(function() {
     attachEvents();
   });
 
+  // Clear all button
   $('#clear-all').click(function() {
     $('#products-body').empty();
     const newRow = $(`
@@ -1607,9 +1781,10 @@ $(document).ready(function() {
     calculateTotal();
   });
 
+  // Discount input handlers
   $('#discount-percent, #discount-flat').on('input', calculateTotal);
 
-  // ================= SCREENSHOT =================
+  // ================= SCREENSHOT FUNCTIONALITY =================
   $('#screenshot-btn').click(function() {
     const name = $('#name').val() || "NoName";
     const yyyy = today.getFullYear();
@@ -1618,6 +1793,7 @@ $(document).ready(function() {
     const dateStr = `${yyyy}${mm}${dd}`;
     const fileName = `${name}_${dateStr}.png`;
     
+    // Use html2canvas to capture the billing container
     html2canvas(document.querySelector("#billing-container")).then(canvas => {
       const link = document.createElement("a");
       link.download = fileName;
@@ -1626,6 +1802,25 @@ $(document).ready(function() {
     });
   });
 });
+
+
+
+
+// Drop Down menu toggle
+  $('#hdrMenuBtn').on('click', function(e){ e.stopPropagation(); $('#hdrMenu').toggle(); });
+  $(document).on('click', function(){ $('#hdrMenu').hide(); });
+
+  // quick add row on Enter in last product name
+  $(document).on('keydown', function(e){
+    if(e.key === 'Enter' && $(':focus').hasClass('prodName')){
+      const focused = $(':focus');
+      const tr = focused.closest('tr');
+      if(tr.is(':last-child')){
+        $('#productRows').append(renderRowElement(createEmptyRow()));
+        recalcAll();
+      }
+    }
+  });
 </script>
 </body>
 </html>
