@@ -848,6 +848,50 @@ $(document).ready(function() {
           showStatus('Please enter valid MRP', 'error');
           return;
       }
+	  
+// Add a new product to the system
+function addNewProduct() {
+    const name = $('#new-product-name').val().trim();
+    const mrp = parseFloat($('#new-product-mrp').val());
+    
+    if (!name) {
+        showStatus('Please enter product name', 'error');
+        return;
+    }
+    
+    if (isNaN(mrp) || mrp <= 0) {
+        showStatus('Please enter valid MRP', 'error');
+        return;
+    }
+    
+    // Check if product already exists
+    const existingProduct = products.find(p => p.name.toLowerCase() === name.toLowerCase());
+    if (existingProduct) {
+        showStatus('Product already exists!', 'error');
+        return;
+    }
+    
+    // Add new product to the array
+    const newProduct = { name: name.toUpperCase(), mrp: mrp };
+    products.push(newProduct);
+    
+    // Save to localStorage
+    saveProductsToStorage(products);
+    
+    // Close modal and show success message
+    $('#add-product-modal').hide();
+    showStatus(`Product "${name}" added successfully!`, 'success');
+    
+    // Clear form inputs
+    $('#new-product-name').val('');
+    $('#new-product-mrp').val('');
+    
+    // CORRECT POSITION: Add this line HERE (at the very end)
+    if ($('#manage-products-modal').is(':visible')) {
+        loadProductsList();
+    }
+}
+	  
       
       // Check if product already exists
       const existingProduct = products.find(p => p.name.toLowerCase() === name.toLowerCase());
@@ -878,123 +922,133 @@ $(document).ready(function() {
     loadProductsList();
   }
 
-  // NEW: Load and display the products list
-  function loadProductsList() {
-    const searchTerm = $('#search-product').val().toLowerCase();
-    const productsList = $('#products-list');
-    productsList.empty();
-    
-    // Filter products based on search term
-    const filteredProducts = products.filter(product => 
-      product.name.toLowerCase().includes(searchTerm)
-    );
-    
-    if (filteredProducts.length === 0) {
-      productsList.html('<div class="no-history" style="text-align: center; padding: 20px;">No products found</div>');
-      return;
-    }
-    
-    // Create HTML for each product
-    filteredProducts.forEach((product, index) => {
-      const productHtml = `
-        <div class="product-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #ddd; border-radius: 6px; margin: 8px 0; background: white;">
-          <div style="flex: 1;">
-            <div style="font-weight: bold; color: #1976d2;">${product.name}</div>
-            <div style="font-size: 14px; color: #666;">MRP: ₹${product.mrp.toFixed(2)}</div>
-          </div>
-          <div>
-            <button class="btn btn-save edit-product-btn" data-index="${index}" style="padding: 6px 12px; margin: 0 4px;">
-              <i class="fa fa-edit"></i> Edit
-            </button>
-            <button class="btn btn-clear delete-product-btn" data-index="${index}" style="padding: 6px 12px; margin: 0 4px;">
-              <i class="fa fa-trash"></i> Delete
-            </button>
-          </div>
-        </div>
-      `;
-      productsList.append(productHtml);
-    });
-    
-    // Attach event handlers to edit and delete buttons
-    $('.edit-product-btn').click(function() {
-      const index = $(this).data('index');
-      editProduct(index);
-    });
-    
-    $('.delete-product-btn').click(function() {
-      const index = $(this).data('index');
-      deleteProduct(index);
-    });
+// NEW: Load and display the products list (REPLACE THIS FUNCTION)
+function loadProductsList() {
+  const searchTerm = $('#search-product').val().toLowerCase();
+  const productsList = $('#products-list');
+  productsList.empty();
+  
+  // Sort products alphabetically by name
+  const sortedProducts = [...products].sort((a, b) => 
+    a.name.localeCompare(b.name)
+  );
+  
+  // Filter products based on search term (use sortedProducts instead of products)
+  const filteredProducts = sortedProducts.filter(product => 
+    product.name.toLowerCase().includes(searchTerm)
+  );
+  
+  if (filteredProducts.length === 0) {
+    productsList.html('<div class="no-history" style="text-align: center; padding: 20px;">No products found</div>');
+    return;
   }
-
-  // NEW: Edit a product
-  function editProduct(index) {
-    const product = products[index];
+  
+  // Create HTML for each product
+  filteredProducts.forEach((product) => {
+    // FIXED: Find the actual index in the original products array
+    const actualIndex = products.findIndex(p => p.name === product.name && p.mrp === product.mrp);
     
-    // Create edit form HTML
-    const editHtml = `
-      <div class="product-edit-form" style="display: flex; gap: 10px; align-items: center; padding: 12px; border: 2px solid #1976d2; border-radius: 6px; margin: 8px 0; background: #f0f8ff;">
+    const productHtml = `
+      <div class="product-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #ddd; border-radius: 6px; margin: 8px 0; background: white;">
         <div style="flex: 1;">
-          <input type="text" class="edit-product-name" value="${product.name}" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 5px;">
-          <input type="number" class="edit-product-mrp" value="${product.mrp}" step="0.01" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+          <div style="font-weight: bold; color: #1976d2;">${product.name}</div>
+          <div style="font-size: 14px; color: #666;">MRP: ₹${product.mrp.toFixed(2)}</div>
         </div>
         <div>
-          <button class="btn btn-save save-product-btn" data-index="${index}" style="padding: 6px 12px; margin: 0 4px;">
-            <i class="fa fa-save"></i> Save
+          <button class="btn btn-save edit-product-btn" data-index="${actualIndex}" style="padding: 6px 12px; margin: 0 4px;">
+            <i class="fa fa-edit"></i> Edit
           </button>
-          <button class="btn btn-clear cancel-edit-btn" style="padding: 6px 12px; margin: 0 4px;">
-            <i class="fa fa-times"></i> Cancel
+          <button class="btn btn-clear delete-product-btn" data-index="${actualIndex}" style="padding: 6px 12px; margin: 0 4px;">
+            <i class="fa fa-trash"></i> Delete
           </button>
         </div>
       </div>
     `;
-    
-    // Replace the product item with edit form
-    $(`.product-item:has(.edit-product-btn[data-index="${index}"])`).html(editHtml);
-    
-    // Attach save event
-    $('.save-product-btn').click(function() {
-      const saveIndex = $(this).data('index');
-      saveProductEdit(saveIndex);
-    });
-    
-    $('.cancel-edit-btn').click(function() {
-      loadProductsList(); // Reload the list to cancel editing
-    });
-  }
+    productsList.append(productHtml);
+  });
+  
+  // Attach event handlers to edit and delete buttons
+  $('.edit-product-btn').click(function() {
+    const index = $(this).data('index');
+    editProduct(index);
+  });
+  
+  $('.delete-product-btn').click(function() {
+    const index = $(this).data('index');
+    deleteProduct(index);
+  });
+}
 
-  // NEW: Save product edits
-  function saveProductEdit(index) {
-    const newName = $(`.edit-product-name`).val().trim();
-    const newMrp = parseFloat($(`.edit-product-mrp`).val());
-    
-    if (!newName) {
-      showStatus('Please enter product name', 'error');
-      return;
-    }
-    
-    if (isNaN(newMrp) || newMrp <= 0) {
-      showStatus('Please enter valid MRP', 'error');
-      return;
-    }
-    
-    // Check for duplicate product name (excluding current product)
-    const duplicate = products.find((p, i) => i !== index && p.name.toLowerCase() === newName.toLowerCase());
-    if (duplicate) {
-      showStatus('Product name already exists!', 'error');
-      return;
-    }
-    
-    // Update product in the array
-    products[index].name = newName.toUpperCase();
-    products[index].mrp = newMrp;
-    
-    // Save to localStorage
-    saveProductsToStorage(products);
-    
-    showStatus(`Product "${newName}" updated successfully!`, 'success');
-    loadProductsList(); // Reload the list
+// NEW: Edit a product (REPLACE THIS FUNCTION)
+function editProduct(index) {
+  const product = products[index];
+  
+  // Create edit form HTML
+  const editHtml = `
+    <div class="product-edit-form" style="display: flex; gap: 10px; align-items: center; padding: 12px; border: 2px solid #1976d2; border-radius: 6px; margin: 8px 0; background: #f0f8ff;">
+      <div style="flex: 1;">
+        <input type="text" class="edit-product-name" value="${product.name}" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 5px;">
+        <input type="number" class="edit-product-mrp" value="${product.mrp}" step="0.01" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+      </div>
+      <div>
+        <button class="btn btn-save save-product-btn" data-index="${index}" style="padding: 6px 12px; margin: 0 4px;">
+          <i class="fa fa-save"></i> Save
+        </button>
+        <button class="btn btn-clear cancel-edit-btn" data-index="${index}" style="padding: 6px 12px; margin: 0 4px;">
+          <i class="fa fa-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+  `;
+  
+  // FIXED: Replace the product item with edit form using correct selector
+  $(`.product-item:has(.edit-product-btn[data-index="${index}"])`).replaceWith(editHtml);
+  
+  // Attach save event
+  $(`.save-product-btn[data-index="${index}"]`).click(function() {
+    const saveIndex = $(this).data('index');
+    saveProductEdit(saveIndex);
+  });
+  
+  $(`.cancel-edit-btn[data-index="${index}"]`).click(function() {
+    loadProductsList(); // Reload the list to cancel editing
+  });
+}
+
+// NEW: Save product edits (REPLACE THIS FUNCTION)
+function saveProductEdit(index) {
+  // FIXED: Get values from the correct edit form
+  const editForm = $(`.save-product-btn[data-index="${index}"]`).closest('.product-edit-form');
+  const newName = editForm.find('.edit-product-name').val().trim();
+  const newMrp = parseFloat(editForm.find('.edit-product-mrp').val());
+  
+  if (!newName) {
+    showStatus('Please enter product name', 'error');
+    return;
   }
+  
+  if (isNaN(newMrp) || newMrp <= 0) {
+    showStatus('Please enter valid MRP', 'error');
+    return;
+  }
+  
+  // Check for duplicate product name (excluding current product)
+  const duplicate = products.find((p, i) => i !== index && p.name.toLowerCase() === newName.toLowerCase());
+  if (duplicate) {
+    showStatus('Product name already exists!', 'error');
+    return;
+  }
+  
+  // Update product in the array
+  products[index].name = newName.toUpperCase();
+  products[index].mrp = newMrp;
+  
+  // Save to localStorage
+  saveProductsToStorage(products);
+  
+  showStatus(`Product "${newName}" updated successfully!`, 'success');
+  loadProductsList(); // Reload the list
+}
 
   // NEW: Delete a product
   function deleteProduct(index) {
