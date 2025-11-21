@@ -9,7 +9,67 @@
     <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.28/dist/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* All existing CSS styles remain exactly the same */
+        /* All existing CSS styles remain the same except the updated parts below */
+        
+        /* UPDATED: Bill Links Modal Styles - Side by Side Images */
+        .bill-links-modal .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .bill-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+        .bill-link-grid-item {
+            position: relative;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background: #f8f9fa;
+            text-align: center;
+        }
+        .bill-link-grid-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        .bill-link-grid-placeholder {
+            width: 100%;
+            height: 150px;
+            background: #e9ecef;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        .bill-link-grid-info {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .bill-link-grid-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Keep all other existing styles the same */
         body {
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -376,30 +436,87 @@
             margin-bottom: 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .bill-links-modal .modal-body {
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-        .bill-link-modal-item {
+
+        /* UPDATED STYLES FOR IMAGE PREVIEW IN FORM - SIDE BY SIDE */
+        .bill-link-input-group {
             display: flex;
             align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+            gap: 8px;
         }
-        .bill-link-modal-item:last-child {
-            border-bottom: none;
+        .bill-link-input {
+            flex: 1;
+            display: none; /* Hide the input field by default */
         }
-        .bill-link-modal-preview {
-            width: 60px;
-            height: 60px;
+        .image-previews-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .image-preview-item {
+            position: relative;
+            width: calc(50% - 5px); /* Two images per row */
+            min-width: 150px;
+        }
+        .image-preview {
+            width: 100%;
+            height: 120px;
             object-fit: cover;
             border-radius: 5px;
-            margin-right: 10px;
-            cursor: pointer;
+            border: 1px solid #ddd;
         }
-        .bill-link-modal-url {
-            flex-grow: 1;
-            word-break: break-all;
+        .preview-loading {
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+        .preview-error {
+            color: #dc3545;
+            font-size: 12px;
+            text-align: center;
+            padding: 10px;
+        }
+        .remove-preview {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pcloud-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 8px;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #856404;
+        }
+        .add-link-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        /* FIX for modal scroll issue */
+        .modal {
+            overflow-y: auto;
+        }
+        .modal-open {
+            overflow: auto;
+            padding-right: 0 !important;
         }
     </style>
 </head>
@@ -530,50 +647,73 @@
                     </div>
                 </div>
 
-                <!-- Transaction Form -->
-                <div class="bg-light rounded p-3 mb-3" id="transactionForm" style="display: none;">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0" id="formTitle">Add Transaction</h6>
-                        <button type="button" class="btn-close" onclick="hideTransactionForm()"></button>
-                    </div>
+                <!-- Transaction History -->
+                <div id="transactionHistory">
+                    <!-- Transactions will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div class="modal fade" id="transactionModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="transactionModalTitle">Add Transaction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="closeTransactionModal()"></button>
+                </div>
+                <div class="modal-body">
                     <form id="transactionFormElement">
                         <input type="hidden" id="transactionType">
                         <input type="hidden" id="editingTransactionId" value="">
                         
-                        <div class="mb-2">
+                        <div class="mb-3">
                             <label class="form-label">Amount *</label>
                             <input type="number" class="form-control" id="amount" required>
                         </div>
                         
-                        <div class="mb-2">
+                        <div class="mb-3">
                             <label class="form-label">Remark</label>
-                            <textarea class="form-control" id="comment" rows="2"></textarea>
+                            <textarea class="form-control" id="comment" rows="3"></textarea>
                         </div>
                         
-                        <div class="mb-2">
+                        <div class="mb-3">
                             <label class="form-label">Date</label>
                             <input type="date" class="form-control" id="transactionDate">
                         </div>
                         
-                        <!-- Bill Attachments Section -->
+                        <!-- Bill Attachments Section with Image Preview -->
                         <div class="bill-attachments-section">
                             <label class="form-label">Bill Links (Optional)</label>
-                            <div id="billLinksContainer">
-                                <!-- Bill links will be added here dynamically -->
+                            
+                            <!-- Image Previews Container -->
+                            <div class="image-previews-container" id="imagePreviewsContainer">
+                                <!-- Image previews will be added here side by side -->
                             </div>
-                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addBillLinkField()">+ Add Bill Link</button>
-                            <small class="form-text text-muted">Paste image URLs or links to bills/receipts</small>
-                        </div>
-                        
-                        <div class="d-grid gap-2 mt-3">
-                            <button type="submit" class="btn btn-primary" id="saveTransactionBtn">Save Transaction</button>
+                            
+                            <!-- Add Link Section -->
+                            <div class="add-link-section">
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control" id="newBillLinkInput" placeholder="Paste image URL here">
+                                    <button type="button" class="btn btn-primary" onclick="addBillLinkFromInput()">Add Image</button>
+                                </div>
+                                <small class="form-text text-muted">
+                                    Paste image URLs to add bill previews. Images will display side by side.
+                                    For pCloud links, we'll try to generate a preview.
+                                </small>
+                            </div>
+                            
+                            <!-- Hidden container for storing actual links -->
+                            <div id="billLinksContainer" style="display: none;">
+                                <!-- Actual bill links will be stored here as hidden inputs -->
+                            </div>
                         </div>
                     </form>
                 </div>
-
-                <!-- Transaction History -->
-                <div id="transactionHistory">
-                    <!-- Transactions will be loaded here -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeTransactionModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveTransaction()" id="saveTransactionBtn">Save Transaction</button>
                 </div>
             </div>
         </div>
@@ -676,7 +816,7 @@
         </div>
     </div>
 
-    <!-- Bill Links Modal -->
+    <!-- UPDATED: Bill Links Modal - Side by Side Images -->
     <div class="modal fade bill-links-modal" id="billLinksModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -685,14 +825,14 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="billLinksModalContent">
-                        <!-- Bill links will be added here dynamically -->
+                    <div class="bill-links-grid" id="billLinksModalContent">
+                        <!-- Bill links will be added here as side by side images -->
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="downloadAllBillLinks()">Download All Links</button>
-                <button type="button" class="btn btn-success" onclick="copyAllBillLinks()">Copy All Links</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadAllBillLinks()">Download All Links</button>
+                    <button type="button" class="btn btn-success" onclick="copyAllBillLinks()">Copy All Links</button>
                 </div>
             </div>
         </div>
@@ -800,7 +940,26 @@
                     applySearchFilter();
                 }
             });
+
+            // Add event listener for Enter key in bill link input
+            document.getElementById('newBillLinkInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addBillLinkFromInput();
+                }
+            });
         });
+
+        // FIX: Function to close transaction modal properly
+        function closeTransactionModal() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('transactionModal'));
+            if (modal) {
+                modal.hide();
+            }
+            // Reset scroll position
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '0';
+        }
 
         // View Management
         function showMemberList() {
@@ -1156,50 +1315,164 @@
             document.getElementById('detailRemainingBalance').textContent = '₹' + formatNumber(currentBalance);
         }
 
-        // Transaction Management
+        // Transaction Management - MODAL VERSION
         function showTransactionForm(type) {
-            if (!currentParty) return;
+            if (!currentParty) {
+                alert('Please select a member first!');
+                return;
+            }
             
             editingTransaction = null;
-            document.getElementById('transactionForm').style.display = 'block';
+            
+            // Set modal title based on transaction type
+            const modalTitle = document.getElementById('transactionModalTitle');
+            modalTitle.textContent = `${type === 'cash_in' ? 'Cash In' : 'Cash Out'} - ${currentParty.name}`;
+            
+            // Set transaction type
             document.getElementById('transactionType').value = type;
-            document.getElementById('formTitle').textContent = `${type === 'cash_in' ? 'Cash In' : 'Cash Out'} - ${currentParty.name}`;
+            
+            // Set button text
             document.getElementById('saveTransactionBtn').textContent = 'Save Transaction';
             
-            // Clear bill links container
-            document.getElementById('billLinksContainer').innerHTML = '';
-            addBillLinkField(); // Add one empty field by default
-        }
-
-        function hideTransactionForm() {
-            document.getElementById('transactionForm').style.display = 'none';
+            // Reset form
             document.getElementById('transactionFormElement').reset();
+            document.getElementById('transactionDate').valueAsDate = new Date();
             document.getElementById('editingTransactionId').value = '';
-            editingTransaction = null;
             
-            // Clear bill links container
+            // Clear bill links containers
+            document.getElementById('imagePreviewsContainer').innerHTML = '';
             document.getElementById('billLinksContainer').innerHTML = '';
-        }
-
-        // Bill Links Management
-        function addBillLinkField(link = '') {
-            const container = document.getElementById('billLinksContainer');
-            const linkId = 'billLink_' + Date.now();
+            document.getElementById('newBillLinkInput').value = '';
             
-            const linkItem = document.createElement('div');
-            linkItem.className = 'bill-link-item';
-            linkItem.innerHTML = `
-                <input type="text" class="form-control form-control-sm" id="${linkId}" value="${link}" placeholder="Paste bill/image URL">
-                <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeBillLinkField(this)">×</button>
-            `;
+            // Show modal
+            const transactionModal = new bootstrap.Modal(document.getElementById('transactionModal'));
+            transactionModal.show();
+        }
+
+        // UPDATED: New function to add bill link from input field
+        function addBillLinkFromInput() {
+            const input = document.getElementById('newBillLinkInput');
+            const url = input.value.trim();
             
-            container.appendChild(linkItem);
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+            
+            // Add the link to preview
+            addBillLinkPreview(url);
+            
+            // Clear the input
+            input.value = '';
         }
 
-        function removeBillLinkField(button) {
-            button.parentElement.remove();
+        // UPDATED: New function to add bill link preview (side by side layout)
+        function addBillLinkPreview(url) {
+            const previewsContainer = document.getElementById('imagePreviewsContainer');
+            const linksContainer = document.getElementById('billLinksContainer');
+            const previewId = 'preview_' + Date.now();
+            const linkId = 'link_' + Date.now();
+            
+            // Create hidden input to store the actual link
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.id = linkId;
+            hiddenInput.value = url;
+            linksContainer.appendChild(hiddenInput);
+            
+            // Create preview item
+            const previewItem = document.createElement('div');
+            previewItem.className = 'image-preview-item';
+            previewItem.id = previewId;
+            previewItem.innerHTML = '<div class="preview-loading">Loading preview...</div>';
+            
+            previewsContainer.appendChild(previewItem);
+            
+            // Check if URL is an image and load preview
+            checkImagePreview(url, previewId, linkId);
         }
 
+        // UPDATED: Function to check if URL is an image and show preview
+        function checkImagePreview(url, previewId, linkId) {
+            const previewItem = document.getElementById(previewId);
+            
+            // Check if URL is likely an image
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+            const isDirectImageUrl = imageExtensions.some(ext => url.toLowerCase().includes(ext));
+            
+            // Check for pCloud links
+            const isPCloudLink = url.includes('pcloud.link') || url.includes('pcloud.com');
+            
+            if (isDirectImageUrl || isPCloudLink) {
+                const img = new Image();
+                img.onload = function() {
+                    previewItem.innerHTML = `
+                        <img src="${url}" class="image-preview" alt="Bill preview" onclick="window.open('${url}', '_blank')">
+                        <button type="button" class="remove-preview" onclick="removeBillLinkPreview('${previewId}', '${linkId}')">×</button>
+                    `;
+                };
+                img.onerror = function() {
+                    if (isPCloudLink) {
+                        previewItem.innerHTML = `
+                            <div class="preview-error">
+                                <small>pCloud link - click to view</small>
+                                <button type="button" class="remove-preview" onclick="removeBillLinkPreview('${previewId}', '${linkId}')">×</button>
+                            </div>
+                        `;
+                    } else {
+                        previewItem.innerHTML = `
+                            <div class="preview-error">
+                                <small>Cannot load preview</small>
+                                <button type="button" class="remove-preview" onclick="removeBillLinkPreview('${previewId}', '${linkId}')">×</button>
+                            </div>
+                        `;
+                    }
+                };
+                
+                // Try to load the image
+                img.src = url;
+                
+                // Set timeout in case image takes too long to load
+                setTimeout(() => {
+                    if (previewItem.innerHTML.includes('Loading preview')) {
+                        if (isPCloudLink) {
+                            previewItem.innerHTML = `
+                                <div class="preview-error">
+                                    <small>pCloud link - click to view</small>
+                                    <button type="button" class="remove-preview" onclick="removeBillLinkPreview('${previewId}', '${linkId}')">×</button>
+                                </div>
+                            `;
+                        } else {
+                            previewItem.innerHTML = `
+                                <div class="preview-error">
+                                    <small>Preview timeout</small>
+                                    <button type="button" class="remove-preview" onclick="removeBillLinkPreview('${previewId}', '${linkId}')">×</button>
+                                </div>
+                            `;
+                        }
+                    }
+                }, 5000);
+            } else {
+                // Not an image URL
+                previewItem.innerHTML = `
+                    <div class="preview-error">
+                        <small>Not an image URL</small>
+                        <button type="button" class="remove-preview" onclick="removeBillLinkPreview('${previewId}', '${linkId}')">×</button>
+                    </div>
+                `;
+            }
+        }
+
+        // UPDATED: Function to remove bill link preview
+        function removeBillLinkPreview(previewId, linkId) {
+            const previewItem = document.getElementById(previewId);
+            const linkInput = document.getElementById(linkId);
+            
+            if (previewItem) previewItem.remove();
+            if (linkInput) linkInput.remove();
+        }
+
+        // UPDATED: Function to get bill links from hidden inputs
         function getBillLinksFromForm() {
             const inputs = document.querySelectorAll('#billLinksContainer input');
             const links = [];
@@ -1213,19 +1486,21 @@
             return links;
         }
 
+        // UPDATED: Function to set bill links in form (for editing)
         function setBillLinksInForm(links) {
-            if (!links || links.length === 0) {
-                addBillLinkField();
-                return;
-            }
+            if (!links || links.length === 0) return;
             
+            // Clear existing previews
+            document.getElementById('imagePreviewsContainer').innerHTML = '';
             document.getElementById('billLinksContainer').innerHTML = '';
             
+            // Add each link as a preview
             links.forEach(link => {
-                addBillLinkField(link);
+                addBillLinkPreview(link);
             });
         }
 
+        // UPDATED: Bill Links Modal - Show images side by side without URLs
         function showBillLinksModal(transactionId) {
             const transaction = transactions.find(t => t.id === transactionId);
             if (!transaction) return;
@@ -1234,26 +1509,52 @@
             modalContent.innerHTML = '';
             
             if (!transaction.billLinks || transaction.billLinks.length === 0) {
-                modalContent.innerHTML = '<p class="text-center text-muted">No bill links available</p>';
+                modalContent.innerHTML = '<p class="text-center text-muted">No bill attachments available</p>';
             } else {
                 transaction.billLinks.forEach((link, index) => {
-                    const linkItem = document.createElement('div');
-                    linkItem.className = 'bill-link-modal-item';
-                    
                     // Check if the link is an image
                     const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(link) || 
                                     link.includes('imgur') || 
                                     link.includes('images') ||
                                     link.includes('photos');
                     
-                    linkItem.innerHTML = `
-                        ${isImage ? `<img src="${link}" class="bill-link-modal-preview" onclick="window.open('${link}', '_blank')" alt="Bill ${index + 1}">` : ''}
-                        <div class="bill-link-modal-url">
-                            <a href="${link}" target="_blank">${link}</a>
-                        </div>
-                    `;
+                    const isPCloud = link.includes('pcloud.link') || link.includes('pcloud.com');
                     
-                    modalContent.appendChild(linkItem);
+                    const gridItem = document.createElement('div');
+                    gridItem.className = 'bill-link-grid-item';
+                    
+                    if (isImage || isPCloud) {
+                        // For image and pCloud links, show image preview
+                        const img = document.createElement('img');
+                        img.className = 'bill-link-grid-image';
+                        img.src = isPCloud ? 'https://www.pcloud.com/favicon.ico' : link;
+                        img.alt = `Bill ${index + 1}`;
+                        img.style.objectFit = isPCloud ? 'contain' : 'cover';
+                        img.style.backgroundColor = isPCloud ? 'white' : 'transparent';
+                        img.onclick = () => window.open(link, '_blank');
+                        
+                        gridItem.appendChild(img);
+                        
+                        const info = document.createElement('div');
+                        info.className = 'bill-link-grid-info';
+                        info.textContent = `Bill ${index + 1}${isPCloud ? ' (pCloud)' : ''}`;
+                        gridItem.appendChild(info);
+                    } else {
+                        // For non-image links, show placeholder
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'bill-link-grid-placeholder';
+                        placeholder.innerHTML = '🔗<br><small>Link</small>';
+                        placeholder.onclick = () => window.open(link, '_blank');
+                        
+                        gridItem.appendChild(placeholder);
+                        
+                        const info = document.createElement('div');
+                        info.className = 'bill-link-grid-info';
+                        info.textContent = `Bill ${index + 1}`;
+                        gridItem.appendChild(info);
+                    }
+                    
+                    modalContent.appendChild(gridItem);
                 });
             }
             
@@ -1313,9 +1614,17 @@
             
             editingTransaction = transaction;
             
-            document.getElementById('transactionForm').style.display = 'block';
+            // Store current scroll position
+            const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Set modal title
+            const modalTitle = document.getElementById('transactionModalTitle');
+            modalTitle.textContent = `Edit Transaction - ${currentParty.name}`;
+            
+            // Set transaction type
             document.getElementById('transactionType').value = transaction.type;
-            document.getElementById('formTitle').textContent = `Edit Transaction - ${currentParty.name}`;
+            
+            // Set button text
             document.getElementById('saveTransactionBtn').textContent = 'Update Transaction';
             
             // Pre-fill form with transaction data
@@ -1326,11 +1635,19 @@
             
             // Pre-fill bill links
             setBillLinksInForm(transaction.billLinks);
+            
+            // Show modal
+            const transactionModal = new bootstrap.Modal(document.getElementById('transactionModal'));
+            transactionModal.show();
+            
+            // Restore scroll position after modal is shown
+            setTimeout(() => {
+                window.scrollTo(0, scrollPosition);
+            }, 100);
         }
 
-        document.getElementById('transactionFormElement').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
+        // Save transaction function for modal
+        function saveTransaction() {
             const amount = parseFloat(document.getElementById('amount').value);
             const comment = document.getElementById('comment').value;
             const date = document.getElementById('transactionDate').value;
@@ -1359,9 +1676,24 @@
                     timestamp: new Date().toISOString()
                 };
 
-                saveTransaction(transaction);
+                saveTransactionData(transaction);
             }
-        });
+            
+            // Close modal
+            closeTransactionModal();
+        }
+
+        // Renamed from saveTransaction to avoid conflict
+        function saveTransactionData(transaction) {
+            transactions.push(transaction);
+            saveTransactions();
+            loadMemberTransactions();
+            updateMemberDetail();
+            updateBackupStatus();
+            
+            // Update member balance
+            updateMemberBalance(transaction.party, transaction.amount, transaction.type);
+        }
 
         function updateTransaction(transactionId, newAmount, newComment, newDate, newType, newBillLinks) {
             const transactionIndex = transactions.findIndex(t => t.id == transactionId);
@@ -1382,21 +1714,8 @@
             saveTransactions();
             loadMemberTransactions();
             updateMemberDetail();
-            hideTransactionForm();
             loadMembers(); // Update member list balances
             updateBackupStatus();
-        }
-
-        function saveTransaction(transaction) {
-            transactions.push(transaction);
-            saveTransactions();
-            loadMemberTransactions();
-            updateMemberDetail();
-            hideTransactionForm();
-            updateBackupStatus();
-            
-            // Update member balance
-            updateMemberBalance(transaction.party, transaction.amount, transaction.type);
         }
 
         function updateMemberBalance(memberName, amount, type) {
@@ -1682,9 +2001,9 @@
                                 <div class="dropdown">
                                     <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">⋯</button>
                                     <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" onclick="editTransaction(${transaction.id})">Edit</a></li>
                                         <li><a class="dropdown-item" href="#" onclick="shareTransaction(${transaction.id})">Share</a></li>
                                         ${hasBillLinks ? `<li><a class="dropdown-item" href="#" onclick="showBillLinksModal(${transaction.id})">View Bills (${billLinksCount})</a></li>` : ''}
-                                        <li><a class="dropdown-item" href="#" onclick="editTransaction(${transaction.id})">Edit</a></li>
                                         <li><a class="dropdown-item text-danger" href="#" onclick="deleteTransaction(${transaction.id})">Delete</a></li>
                                     </ul>
                                 </div>
@@ -1741,281 +2060,293 @@
         }
 
         function generatePDF(useFilter) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Header
-    doc.setFontSize(20);
-    doc.setTextColor(0, 0, 128);
-    doc.text('BUSINESS REPORT', 105, 15, { align: 'center' });
-    
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 25, { align: 'center' });
-    
-    if (currentParty) {
-        doc.text(`Member: ${currentParty.name}`, 105, 32, { align: 'center' });
-        
-        // Get all transactions for this member
-        let memberTransactions = transactions.filter(t => t.party === currentParty.name);
-        
-        // Apply date filter if requested
-        if (useFilter && currentFilter.fromDate && currentFilter.toDate) {
-            memberTransactions = memberTransactions.filter(t => 
-                t.date >= currentFilter.fromDate && t.date <= currentFilter.toDate
-            );
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
             
-            // Add filter info
-            doc.text(`Date Range: ${formatDateForDisplay(currentFilter.fromDate)} to ${formatDateForDisplay(currentFilter.toDate)}`, 105, 39, { align: 'center' });
-        }
-        
-        // Apply search filter if requested
-        if (useFilter && currentFilter.searchKeyword) {
-            const keyword = currentFilter.searchKeyword.toLowerCase();
-            memberTransactions = memberTransactions.filter(t => 
-                t.comment?.toLowerCase().includes(keyword) ||
-                t.amount.toString().includes(keyword) ||
-                t.party.toLowerCase().includes(keyword) ||
-                (t.billLinks && t.billLinks.some(link => link.toLowerCase().includes(keyword))) ||
-                t.type.toLowerCase().includes(keyword)
-            );
-            
-            // Add search info
-            doc.text(`Search: "${currentFilter.searchKeyword}"`, 105, 46, { align: 'center' });
-        }
-        
-        // Calculate summary data
-        let openingBalance = 0;
-        let totalIn = 0;
-        let totalOut = 0;
-        
-        if (useFilter && currentFilter.fromDate) {
-            // Calculate opening balance (transactions before filter)
-            const transactionsBeforeFilter = transactions.filter(t => 
-                t.party === currentParty.name && t.date < currentFilter.fromDate
-            );
-            
-            transactionsBeforeFilter.forEach(transaction => {
-                if (transaction.type === 'cash_in') {
-                    openingBalance += transaction.amount;
-                } else {
-                    openingBalance -= transaction.amount;
-                }
-            });
-        }
-        
-        // Calculate totals from filtered transactions
-        memberTransactions.forEach(transaction => {
-            if (transaction.type === 'cash_in') {
-                totalIn += transaction.amount;
-            } else {
-                totalOut += transaction.amount;
-            }
-        });
-        
-        const finalBalance = openingBalance + totalIn - totalOut;
-        
-        // Add summary table
-        const summaryData = [
-            ['Closing Balance',  formatNumber(openingBalance)],
-            ['Cash In',  formatNumber(totalIn)],
-            ['Cash Out',  formatNumber(totalOut)],
-            ['Final Balance',  formatNumber(finalBalance)]
-        ];
-        
-        // Add summary title
-        doc.setFontSize(16);
-        let startY = 50;
-        if (useFilter && (currentFilter.fromDate || currentFilter.searchKeyword)) {
-            startY = 55;
-            if (currentFilter.fromDate && currentFilter.searchKeyword) {
-                startY = 60;
-            }
-        }
-        doc.text('Summary', 14, startY);
-        
-        // Add summary table
-        doc.autoTable({
-            startY: startY + 5,
-            body: summaryData,
-            theme: 'grid',
-            styles: { 
-                fontSize: 12, 
-                cellPadding: 5,
-                lineWidth: 0.5
-            },
-            columnStyles: {
-                0: { fontStyle: 'bold', cellWidth: 60 },
-                1: { fontStyle: 'bold', cellWidth: 40 }
-            },
-            margin: { top: 10 }
-        });
-        
-        // Sort transactions by date for table
-        const sortedTransactions = [...memberTransactions].sort((a, b) => new Date(a.date) - new Date(b.date));
-        
-        let runningBalance = openingBalance;
-        const tableData = sortedTransactions.map((transaction) => {
-            const openingBalanceForRow = runningBalance;
-            
-            if (transaction.type === 'cash_in') {
-                runningBalance += transaction.amount;
-            } else {
-                runningBalance -= transaction.amount;
-            }
-            
-            // Create bill links display - SIMPLE TEXT ONLY
-            let billLinksDisplay = '-';
-            if (transaction.billLinks && transaction.billLinks.length > 0) {
-                billLinksDisplay = transaction.billLinks.length + ' bill' + (transaction.billLinks.length > 1 ? 's' : '');
-            }
-            
-            return [
-                transaction.date,
-                formatNumber(openingBalanceForRow),
-                transaction.type === 'cash_in' ? formatNumber(transaction.amount) : '-',
-                transaction.type === 'cash_out' ? formatNumber(transaction.amount) : '-',
-                formatNumber(runningBalance),
-                transaction.comment || '-',
-                billLinksDisplay
-            ];
-        });
-        
-        // Add transaction table
-        if (tableData.length > 0) {
-            doc.autoTable({
-                startY: doc.lastAutoTable.finalY + 10,
-                head: [['Date', 'Opening', 'Cash In', 'Cash Out', 'Balance', 'Remark', 'Bills']],
-                body: tableData,
-                theme: 'grid',
-                headStyles: { 
-                    fillColor: [0, 123, 255],
-                    textColor: 255,
-                    fontStyle: 'bold'
-                },
-                styles: { 
-                    fontSize: 8, 
-                    cellPadding: 3
-                },
-                columnStyles: {
-                    0: { cellWidth: 20 }, // Date
-                    1: { cellWidth: 18 }, // Opening
-                    2: { cellWidth: 15 }, // Cash In
-                    3: { cellWidth: 15 }, // Cash Out
-                    4: { cellWidth: 18 }, // Balance
-                    5: { cellWidth: 45 }, // Remark
-                    6: { cellWidth: 15 }  // Bills
-                },
-                pageBreak: 'auto'
-            });
-        }
-        
-// Add bill links section after the table
-        const transactionsWithBills = sortedTransactions.filter(t => t.billLinks && t.billLinks.length > 0);
-        if (transactionsWithBills.length > 0) {
-            let yPosition = doc.lastAutoTable.finalY + 15;
-            
-            // Check if we need a new page
-            if (yPosition > 250) {
-                doc.addPage();
-                yPosition = 20;
-            }
-            
-            doc.setFontSize(14);
+            // Header
+            doc.setFontSize(20);
             doc.setTextColor(0, 0, 128);
-            doc.text('BILL LINKS', 14, yPosition);
-            yPosition += 15;
+            doc.text('BUSINESS REPORT', 105, 15, { align: 'center' });
             
-            transactionsWithBills.forEach((transaction, index) => {
-                // Check if we need a new page
-                if (yPosition > 270) {
-                    doc.addPage();
-                    yPosition = 20;
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 25, { align: 'center' });
+            
+            if (currentParty) {
+                doc.text(`Member: ${currentParty.name}`, 105, 32, { align: 'center' });
+                
+                // Get all transactions for this member
+                let memberTransactions = transactions.filter(t => t.party === currentParty.name);
+                
+                // Apply date filter if requested
+                if (useFilter && currentFilter.fromDate && currentFilter.toDate) {
+                    memberTransactions = memberTransactions.filter(t => 
+                        t.date >= currentFilter.fromDate && t.date <= currentFilter.toDate
+                    );
+                    
+                    // Add filter info
+                    doc.text(`Date Range: ${formatDateForDisplay(currentFilter.fromDate)} to ${formatDateForDisplay(currentFilter.toDate)}`, 105, 39, { align: 'center' });
                 }
                 
-                // Add separator line between transactions (except for first one)
-                if (index > 0) {
-                    doc.setDrawColor(200, 200, 200);
-                    doc.line(14, yPosition, 190, yPosition);
+                // Apply search filter if requested
+                if (useFilter && currentFilter.searchKeyword) {
+                    const keyword = currentFilter.searchKeyword.toLowerCase();
+                    memberTransactions = memberTransactions.filter(t => 
+                        t.comment?.toLowerCase().includes(keyword) ||
+                        t.amount.toString().includes(keyword) ||
+                        t.party.toLowerCase().includes(keyword) ||
+                        (t.billLinks && t.billLinks.some(link => link.toLowerCase().includes(keyword))) ||
+                        t.type.toLowerCase().includes(keyword)
+                    );
+                    
+                    // Add search info
+                    doc.text(`Search: "${currentFilter.searchKeyword}"`, 105, 46, { align: 'center' });
+                }
+                
+                // Calculate summary data
+                let openingBalance = 0;
+                let totalIn = 0;
+                let totalOut = 0;
+                
+                if (useFilter && currentFilter.fromDate) {
+                    // Calculate opening balance (transactions before filter)
+                    const transactionsBeforeFilter = transactions.filter(t => 
+                        t.party === currentParty.name && t.date < currentFilter.fromDate
+                    );
+                    
+                    transactionsBeforeFilter.forEach(transaction => {
+                        if (transaction.type === 'cash_in') {
+                            openingBalance += transaction.amount;
+                        } else {
+                            openingBalance -= transaction.amount;
+                        }
+                    });
+                }
+                
+                // Calculate totals from filtered transactions
+                memberTransactions.forEach(transaction => {
+                    if (transaction.type === 'cash_in') {
+                        totalIn += transaction.amount;
+                    } else {
+                        totalOut += transaction.amount;
+                    }
+                });
+                
+                const finalBalance = openingBalance + totalIn - totalOut;
+                
+                // Add summary table
+                const summaryData = [
+                    ['Opening Balance', '₹ ' + formatNumber(openingBalance)],
+                    ['Cash In', '₹ ' + formatNumber(totalIn)],
+                    ['Cash Out', '₹ ' + formatNumber(totalOut)],
+                    ['Final Balance', '₹ ' + formatNumber(finalBalance)]
+                ];
+                
+                // Add summary title
+                doc.setFontSize(16);
+                let startY = 50;
+                if (useFilter && (currentFilter.fromDate || currentFilter.searchKeyword)) {
+                    startY = 55;
+                    if (currentFilter.fromDate && currentFilter.searchKeyword) {
+                        startY = 60;
+                    }
+                }
+                doc.text('Summary', 14, startY);
+                
+                // Add summary table
+                doc.autoTable({
+                    startY: startY + 5,
+                    body: summaryData,
+                    theme: 'grid',
+                    styles: { 
+                        fontSize: 12, 
+                        cellPadding: 5,
+                        lineWidth: 0.5
+                    },
+                    columnStyles: {
+                        0: { fontStyle: 'bold', cellWidth: 60 },
+                        1: { fontStyle: 'bold', cellWidth: 40 }
+                    },
+                    margin: { top: 10 }
+                });
+                
+                // Sort transactions by date for table
+                const sortedTransactions = [...memberTransactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                let runningBalance = openingBalance;
+                const tableData = sortedTransactions.map((transaction) => {
+                    const openingBalanceForRow = runningBalance;
+                    
+                    if (transaction.type === 'cash_in') {
+                        runningBalance += transaction.amount;
+                    } else {
+                        runningBalance -= transaction.amount;
+                    }
+                    
+                    // Create bill links display
+                    let billLinksDisplay = '-';
+                    if (transaction.billLinks && transaction.billLinks.length > 0) {
+                        billLinksDisplay = transaction.billLinks.length + ' bill' + (transaction.billLinks.length > 1 ? 's' : '');
+                    }
+                    
+                    return [
+                        transaction.date,
+                        '₹ ' + formatNumber(openingBalanceForRow),
+                        transaction.type === 'cash_in' ? '₹ ' + formatNumber(transaction.amount) : '-',
+                        transaction.type === 'cash_out' ? '₹ ' + formatNumber(transaction.amount) : '-',
+                        '₹ ' + formatNumber(runningBalance),
+                        transaction.comment || '-',
+                        billLinksDisplay
+                    ];
+                });
+                
+                // Add transaction table
+                if (tableData.length > 0) {
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 10,
+                        head: [['Date', 'Opening', 'Cash In', 'Cash Out', 'Balance', 'Remark', 'Bills']],
+                        body: tableData,
+                        theme: 'grid',
+                        headStyles: { 
+                            fillColor: [0, 123, 255],
+                            textColor: 255,
+                            fontStyle: 'bold'
+                        },
+                        styles: { 
+                            fontSize: 8, 
+                            cellPadding: 3
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 20 }, // Date
+                            1: { cellWidth: 18 }, // Opening
+                            2: { cellWidth: 15 }, // Cash In
+                            3: { cellWidth: 15 }, // Cash Out
+                            4: { cellWidth: 18 }, // Balance
+                            5: { cellWidth: 45 }, // Remark
+                            6: { cellWidth: 15 }  // Bills
+                        },
+                        pageBreak: 'auto'
+                    });
+                }
+                
+                // Add bill links with image indicators section after the table
+                const transactionsWithBills = sortedTransactions.filter(t => t.billLinks && t.billLinks.length > 0);
+                if (transactionsWithBills.length > 0) {
+                    let yPosition = doc.lastAutoTable.finalY + 15;
+                    
+                    // Check if we need a new page
+                    if (yPosition > 250) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    doc.setFontSize(14);
+                    doc.setTextColor(0, 0, 128);
+                    doc.text('BILL ATTACHMENTS', 14, yPosition);
                     yPosition += 10;
+                    
+                    transactionsWithBills.forEach((transaction, index) => {
+                        // Check if we need a new page
+                        if (yPosition > 270) {
+                            doc.addPage();
+                            yPosition = 20;
+                        }
+                        
+                        // Add separator line between transactions (except for first one)
+                        if (index > 0) {
+                            doc.setDrawColor(200, 200, 200);
+                            doc.line(14, yPosition, 190, yPosition);
+                            yPosition += 8;
+                        }
+                        
+                        // Transaction header with date and full remark
+                        doc.setFontSize(10);
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFont(undefined, 'bold');
+                        
+                        // Transaction info
+                        const transactionInfo = `${transaction.date} - ${transaction.type.toUpperCase()} - ₹${formatNumber(transaction.amount)}`;
+                        doc.text(transactionInfo, 14, yPosition);
+                        yPosition += 5;
+                        
+                        // Remark
+                        if (transaction.comment) {
+                            doc.setFont(undefined, 'normal');
+                            const remarkLines = doc.splitTextToSize(`Remark: ${transaction.comment}`, 180);
+                            remarkLines.forEach(line => {
+                                if (yPosition > 270) {
+                                    doc.addPage();
+                                    yPosition = 20;
+                                }
+                                doc.text(line, 14, yPosition);
+                                yPosition += 4;
+                            });
+                        }
+                        
+                        yPosition += 3;
+                        
+                        // Bill links with image indicators
+                        doc.setFontSize(9);
+                        transaction.billLinks.forEach((link, linkIndex) => {
+                            if (yPosition > 270) {
+                                doc.addPage();
+                                yPosition = 20;
+                            }
+                            
+                            // Check if link is an image or pCloud
+                            const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(link) || 
+                                          link.includes('imgur') || 
+                                          link.includes('images') ||
+                                          link.includes('photos');
+                            
+                            const isPCloud = link.includes('pcloud.link') || link.includes('pcloud.com');
+                            
+                            const linkText = `Bill ${linkIndex + 1}${isImage ? ' 📷' : ''}${isPCloud ? ' ☁️' : ''}`;
+                            
+                            // Make the link text clickable
+                            doc.setTextColor(0, 0, 255);
+                            doc.textWithLink(linkText, 20, yPosition, { url: link });
+                            
+                            // Show the actual URL in black (non-clickable)
+                            doc.setTextColor(0, 0, 0);
+                            const urlText = `: ${link}`;
+                            doc.text(urlText, 20 + doc.getTextWidth(linkText), yPosition);
+                            
+                            yPosition += 4;
+                        });
+                        
+                        // Add space after each transaction
+                        yPosition += 8;
+                    });
                 }
+            } else {
+                // All members summary
+                const memberData = parties.map(party => [
+                    party.name,
+                    '₹' + formatNumber(party.balance || 0)
+                ]);
                 
-                // Transaction header with date and full remark
-                doc.setFontSize(10);
-                doc.setTextColor(0, 0, 0);
-                doc.setFont(undefined, 'bold');
-                
-                // Split long remarks into multiple lines
-                const remarkLines = doc.splitTextToSize(
-                    `${transaction.date} - ${transaction.comment || 'No remark'}`,
-                    180
-                );
-                
-                remarkLines.forEach(line => {
-                    if (yPosition > 270) {
-                        doc.addPage();
-                        yPosition = 20;
+                doc.autoTable({
+                    startY: 40,
+                    head: [['Member', 'Balance']],
+                    body: memberData,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [0, 123, 255],
+                        textColor: 255,
+                        fontStyle: 'bold'
                     }
-                    doc.text(line, 14, yPosition);
-                    yPosition += 5;
                 });
-                
-                doc.setFont(undefined, 'normal');
-                yPosition += 3;
-                
-                // Bill links
-                doc.setFontSize(9);
-                transaction.billLinks.forEach((link, linkIndex) => {
-                    if (yPosition > 270) {
-                        doc.addPage();
-                        yPosition = 20;
-                    }
-                    
-                    // Make the link text clickable
-                    doc.setTextColor(0, 0, 255);
-                    const linkText = `Bill ${linkIndex + 1}`;
-                    doc.textWithLink(linkText, 20, yPosition, { url: link });
-                    
-                    // Show the actual URL in black (non-clickable)
-                    doc.setTextColor(0, 0, 0);
-                    const urlText = `: ${link}`;
-                    doc.text(urlText, 20 + doc.getTextWidth(linkText), yPosition);
-                    
-                    yPosition += 5;
-                });
-                
-                // Add space after each transaction
-                yPosition += 10;
-            });
-        }
-    } else {
-        // All members summary
-        const memberData = parties.map(party => [
-            party.name,
-            '₹' + formatNumber(party.balance || 0)
-        ]);
-        
-        doc.autoTable({
-            startY: 40,
-            head: [['Member', 'Balance']],
-            body: memberData,
-            theme: 'grid',
-            headStyles: { 
-                fillColor: [0, 123, 255],
-                textColor: 255,
-                fontStyle: 'bold'
             }
-        });
-    }
-    
-    let fileName = currentParty ? `${currentParty.name}-report.pdf` : 'members-report.pdf';
-    
-    if (useFilter && currentFilter.fromDate && currentFilter.toDate) {
-        fileName = `${currentParty.name}-${currentFilter.fromDate}-to-${currentFilter.toDate}.pdf`;
-    }
-    
-    doc.save(fileName);
-}
+            
+            let fileName = currentParty ? `${currentParty.name}-report.pdf` : 'members-report.pdf';
+            
+            if (useFilter && currentFilter.fromDate && currentFilter.toDate) {
+                fileName = `${currentParty.name}-${currentFilter.fromDate}-to-${currentFilter.toDate}.pdf`;
+            }
+            
+            doc.save(fileName);
+        }
 
         // BACKUP SYSTEM FUNCTIONS
         function updateBackupStatus() {
@@ -2211,6 +2542,14 @@
 
         // Back button event
         document.getElementById('backButton').addEventListener('click', showMemberList);
+
+        // Add Enter key support in transaction modal
+        document.getElementById('transactionFormElement').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveTransaction();
+            }
+        });
     </script>
 </body>
 </html>
